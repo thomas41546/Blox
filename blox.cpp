@@ -225,8 +225,8 @@ public:
         for(j = start_j; j < end_j; j++){
             for(i = start_i; i < end_i; i++){
                 
-                SDL_Rect rect = {(i - start_i)/cellSize,
-                                 (j - start_j)/cellSize,
+                SDL_Rect rect = {(i - start_i),
+                                 (j - start_j),
                                  cellSize,
                                  cellSize};
                 
