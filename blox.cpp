@@ -409,7 +409,6 @@ int main( int argc, char* args[] ){
                 }
             }
             if(collidedY){
-                   printf("collision Y\n");
                     
             }
             else{
@@ -440,7 +439,6 @@ int main( int argc, char* args[] ){
                 }
             }
             if(collidedX){
-                 printf("collision X\n");
             }
             
             if(!collidedX)
