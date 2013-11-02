@@ -216,21 +216,21 @@ public:
         
         unsigned int i,j;
         
-        unsigned int start_i = calculate_Cell_X(getX(),cells);
-        unsigned int start_j = calculate_Cell_Y(getY(),cells);
+        unsigned int start_i = getX();
+        unsigned int start_j = getY();
         
-        unsigned int end_i = calculate_Cell_X(getX() + getWidth(),cells);
-        unsigned int end_j = calculate_Cell_Y(getY() + getHeight(),cells);
+        unsigned int end_i = getX() + getWidth();
+        unsigned int end_j = getY() + getHeight();
         
         for(j = start_j; j < end_j; j++){
             for(i = start_i; i < end_i; i++){
                 
-                SDL_Rect rect = {(i - start_i)*cellSize,
-                                 (j - start_j)*cellSize,
+                SDL_Rect rect = {(i - start_i)/cellSize,
+                                 (j - start_j)/cellSize,
                                  cellSize,
                                  cellSize};
                 
-                if(cells.getCellIndex(i,j) != NULL && (cells.getCellIndex(i,j))->is_frozen){
+                if(cells.getCellByPixel(i,j) != NULL && (cells.getCellByPixel(i,j))->is_frozen){
                     SDL_FillRect(getSurface(), &rect, COLOR_BLACK);
                     rect.x += 1;
                     rect.y += 1;
