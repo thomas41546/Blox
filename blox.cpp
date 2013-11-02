@@ -173,14 +173,6 @@ public:
     
     SDL_Surface* getSurface () {return surface;}
     
-    int calculate_Cell_X(int x, CellMatrix & cells){ //TODO move to cellMatrix?
-        return  x/(getWidth()/cells.getWidth());
-    }
-    
-    int calculate_Cell_Y(int y, CellMatrix & cells){
-        return y/(getHeight()/cells.getHeight());
-    }
-    
     void scrollHorizonally(int amount) {
         if(x + amount >= maxScrollWidth) {
             if(amount <= 0)
@@ -203,6 +195,11 @@ public:
             y += amount;
     }
     
+    void setXY(unsigned int _x, unsigned int _y){
+        x = _x;
+        y = _y;
+    }
+    
     void renderStart(){
         //blank
         SDL_Rect rect = {0,0,getWidth(), getHeight()};
@@ -212,7 +209,7 @@ public:
     void renderCells(CellMatrix & cells){
         
         
-        int cellSize = CellMatrix::getCellSize();
+        unsigned int cellSize = CellMatrix::getCellSize();
         
         unsigned int i,j;
         
@@ -222,8 +219,8 @@ public:
         unsigned int end_i = getX() + getWidth();
         unsigned int end_j = getY() + getHeight();
         
-        for(j = start_j; j < end_j; j++){
-            for(i = start_i; i < end_i; i++){
+        for(j = start_j; j < end_j; j+= cellSize){
+            for(i = start_i; i < end_i; i+=cellSize){
                 
                 SDL_Rect rect = {(i - start_i),
                                  (j - start_j),
@@ -277,8 +274,19 @@ int main( int argc, char* args[] ){
     SDL_EnableKeyRepeat(1, 5);
     
 	int is_game = 1;
+    int fps = 0;
+    unsigned int lastTime = SDL_GetTicks();
     
 	while(is_game){
+        unsigned int curTime = SDL_GetTicks();
+        if(curTime - lastTime >= 1000){
+            printf("FPS: %d\n",fps);
+            lastTime = curTime;
+            fps = 0;
+        }else{
+            fps += 1;
+        }
+        
 		SDL_Event event;
 		while ( SDL_PollEvent(&event) ) {
 			switch (event.type) {
@@ -304,6 +312,7 @@ int main( int argc, char* args[] ){
             
             ((Entity *)(*it))->vy += 0.01; // TODO define gravity;
             ((Entity *)(*it))->y += ((Entity *)(*it))->vy;
+             mainWindow->setXY(((Entity *)(*it))->x,((Entity *)(*it))->y);
             
         }
         
@@ -314,7 +323,7 @@ int main( int argc, char* args[] ){
         }
         
         mainWindow->renderFinish();
-		SDL_Delay( MAIN_LOOP_DELAY );
+		SDL_Delay( 0 );
 	}
 	printf("You lost the game.\nNoob!\n");
     exit_Game();
