@@ -109,19 +109,13 @@ class Window {
     }
 };
 
-
-typedef struct {
-	unsigned int width,height;
-	Cell * array;
-} Cells;
-
 typedef struct {
     unsigned int width, height;
 	SDL_Surface* surface;
 } Screen;
 
 static Screen screen;
-static Cells cells;
+static CellMatrix cells(CELL_WIDTH,CELL_HEIGHT);
 static Window mainWindow(0,0,100,100,3000,3000);
 
 
