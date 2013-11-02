@@ -10,36 +10,105 @@
 #include <string>
 #include <iostream>
 #include <boost/foreach.hpp>
+#include <assert.h>  
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 
 
+// colors
 const int COLOR_WHITE =   0xFFFFFF;
 const int COLOR_BLACK =   0x000000;
 const int COLOR_RED =     0xFF0000;
 const int COLOR_RED2 =     0xEE0000;
 const int COLOR_BLUE =  0x33CCFF;
 const int COLOR_GREEN =   0x00FF00;
+
+
 const int CELL_WIDTH =   120;
 const int CELL_HEIGHT =   80;
 const int SCREEN_WIDTH =   1200;
 const int SCREEN_HEIGHT =   800;
+
+const int SCROLL_AMOUNT = 100;
+
 const int MAIN_LOOP_DELAY =   10;
 
-typedef struct {
-	unsigned int x;
-	unsigned int y;
-    
-    unsigned int width;
-	unsigned int height;
-} Window;
 
-typedef struct {
-	unsigned int is_frozen;
-	unsigned int is_herd;
-} Cell;
+class Cell{
+    public:
+        unsigned int is_frozen;
+        unsigned int is_herd;
+};
+
+class CellMatrix {
+    private:
+        Cell * matrix;
+        unsigned int width;
+        unsigned int height;
+    
+    public:
+        CellMatrix(unsigned int _width, unsigned int _height){
+            width = _width;
+            height = _height;
+            matrix = new Cell[width*height]();
+        }
+    
+        unsigned int getWidth () {return width;}
+        unsigned int getHeight () {return height;}
+        
+        Cell * getCellIndex(unsigned int x, unsigned int y){
+            if (y >= 0 && x < width && y >= 0 && y < height){
+                return &(matrix[x + y*width]);
+            }
+            else{
+                return NULL;
+            }
+        }
+};
+
+class Window {
+    private:
+        unsigned int x;
+        unsigned int y;
+        
+        unsigned int width;
+        unsigned int height;
+    
+        unsigned int maxScrollWidth;
+        unsigned int maxScrollHeight;
+    
+    public:
+        Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight){
+            x = _x;
+            y = _y;
+            width = _width;
+            height = _height;
+            maxScrollWidth = _maxScrollWidth;
+            maxScrollHeight = _maxScrollHeight;
+            
+        }
+    
+    unsigned int getX () {return x;}
+    unsigned int getY () {return y;}
+    
+    unsigned int getWidth () {return width;}
+    unsigned int getHeight () {return height;}
+    
+    void scrollHorizonally(int amount) {
+        x += amount;
+        if(x < 0) x = 0;
+        if(x >= maxScrollWidth) x = maxScrollWidth-1;
+    }
+    
+    void scrollVertically(int amount) {
+        y += amount;
+        if(y < 0) y = 0;
+        if(y >= maxScrollHeight) y = maxScrollHeight-1;
+    }
+};
+
 
 typedef struct {
 	unsigned int width,height;
@@ -53,7 +122,8 @@ typedef struct {
 
 static Screen screen;
 static Cells cells;
-static Window mainWindow= {0, 0, 100, 100};
+static Window mainWindow(0,0,100,100,3000,3000);
+
 
 int calculate_Cell_X(int x){
 	return  x/(screen.width/cells.width);
@@ -78,7 +148,7 @@ void render_Screen(){
 	int cell_pixel_width = screen.width/cells.width;
 	int cell_pixel_height = screen.height/cells.height;
 	
-	int i,j;
+	unsigned int i,j;
 	
 	for(j = 0; j < cells.height; j++){
 		for(i = 0; i < cells.width; i++){
@@ -106,7 +176,7 @@ void exit_Game(){
 }
 
 int main( int argc, char* args[] ){
-	int i,j;
+	unsigned int i,j;
 
     std::string hello( "Hello, world!" );
     BOOST_FOREACH( char ch, hello )
@@ -141,10 +211,16 @@ int main( int argc, char* args[] ){
 				case SDL_MOUSEBUTTONDOWN:
 					toggle_Cell(event.button.x, event.button.y);
 					break;
-                    
+                
                 case SDL_KEYDOWN:
                     if(event.key.keysym.sym == SDLK_LEFT)
-                        
+                        mainWindow.scrollHorizonally(-1*SCROLL_AMOUNT);
+                    else if(event.key.keysym.sym == SDLK_RIGHT)
+                        mainWindow.scrollHorizonally(SCROLL_AMOUNT);
+                    else if(event.key.keysym.sym == SDLK_UP)
+                        mainWindow.scrollVertically(-1*SCROLL_AMOUNT);
+                    else if(event.key.keysym.sym == SDLK_DOWN)
+                        mainWindow.scrollVertically(SCROLL_AMOUNT);
                     break;
 				
 				case SDL_QUIT:
