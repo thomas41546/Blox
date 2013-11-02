@@ -11,6 +11,7 @@
 #include <iostream>
 #include <boost/foreach.hpp>
 #include <assert.h>
+#include <vector>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,12 +26,12 @@ const int COLOR_RED2 =     0xEE0000;
 const int COLOR_BLUE =  0x33CCFF;
 const int COLOR_GREEN =   0x00FF00;
 
-const int CELL_WIDTH =   120;
-const int CELL_HEIGHT =   80;
+const int CELL_WIDTH =   400;
+const int CELL_HEIGHT =   400;
 const int SCREEN_WIDTH =   1200;
 const int SCREEN_HEIGHT =   800;
 
-const int SCROLL_AMOUNT = 1;
+const int SCROLL_AMOUNT = 5;
 
 const int MAIN_LOOP_DELAY =   10;
 
@@ -53,22 +54,37 @@ public:
         height = _height;
         matrix = new Cell[width*height]();
         
+        //map generation
         unsigned i,j;
         for(j = 0; j < height; j++){
             for(i = 0; i < width; i++){
-                (getCellIndex(i,j))->is_frozen = 0;
+                if(rand() % 50 == 0)
+                    (getCellIndex(i,j))->is_frozen = 1;
+                else{
+                    if(i > 0 && j > 0 && i < width-1 && j < height-1){
+                        if(getCellIndex(i,j+1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
+                        if(getCellIndex(i+1,j)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
+                        if(getCellIndex(i,j-1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
+                        if(getCellIndex(i-1,j)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
+                        if(getCellIndex(i-1,j-1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
+                        if(getCellIndex(i+1,j+1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
+                    }
+                }
             }
         }
+        
+        
     }
     
     // pixel units
-    static unsigned int getCellSize() {return 10;}
+    static const unsigned int getCellSize() {return 10;}
     
     unsigned int getWidth () {return width;}
     unsigned int getHeight () {return height;}
     
+    
     Cell * getCellIndex(unsigned int x, unsigned int y){
-        if (y >= 0 && x < width && y >= 0 && y < height){
+        if (x >= 0 && x < width && y >= 0 && y < height){
             return &(matrix[x + y*width]);
         }
         else{
@@ -76,11 +92,53 @@ public:
         }
     }
     
+    
+    Cell * getCellByPixel(unsigned int x, unsigned int y){
+        x /= CellMatrix::getCellSize();
+        y /= CellMatrix::getCellSize();
+        return getCellIndex(x,y);
+    }
+    
     ~CellMatrix(){
         delete[] matrix;
     }
 };
 
+class EntityManager{
+    
+    
+};
+
+
+class Entity{
+    public:
+        //TODO encapsulate
+        unsigned int width,height;
+        float vx,vy;
+        float x,y;
+    
+        Entity(SDL_Rect _dimensions){
+            x = (float)_dimensions.x;
+            y = (float)_dimensions.y;
+            width = _dimensions.w;
+            height = _dimensions.h;
+            vx = 0;
+            vy = 0;
+        }
+    
+        SDL_Rect getRect(){
+            SDL_Rect rect = {(unsigned int)x, (unsigned int)y, width,height};
+            return rect;
+        }
+    
+        void render(SDL_Surface* surface){
+            SDL_Rect rect = getRect();
+            SDL_FillRect(surface, &rect, COLOR_BLACK);
+        }
+    
+};
+
+// TODO convert x,y,width,height to SDL_Rect
 class Window {
 private:
     unsigned int x;
@@ -115,41 +173,64 @@ public:
     
     SDL_Surface* getSurface () {return surface;}
     
+    int calculate_Cell_X(int x, CellMatrix & cells){ //TODO move to cellMatrix?
+        return  x/(getWidth()/cells.getWidth());
+    }
+    
+    int calculate_Cell_Y(int y, CellMatrix & cells){
+        return y/(getHeight()/cells.getHeight());
+    }
+    
     void scrollHorizonally(int amount) {
-        x += amount;
-        if(x < 0) x = 0;
-        if(x >= maxScrollWidth) x = maxScrollWidth-1;
+        if(x + amount >= maxScrollWidth) {
+            if(amount <= 0)
+                x = 0;
+            else
+                x = maxScrollWidth-1;
+        }
+        else
+            x += amount;
     }
     
     void scrollVertically(int amount) {
-        y += amount;
-        if(y < 0) y = 0;
-        if(y >= maxScrollHeight) y = maxScrollHeight-1;
+        if(y + amount >= maxScrollHeight){
+            if(amount <= 0)
+                y = 0;
+            else
+                y = maxScrollHeight-1;
+        }
+        else
+            y += amount;
+    }
+    
+    void renderStart(){
+        //blank
+        SDL_Rect rect = {0,0,getWidth(), getHeight()};
+        SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
     }
     
     void renderCells(CellMatrix & cells){
         
-        //blank
-        SDL_Rect rect = {0,0,getWidth(), getHeight()};
-        SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
         
-        int cell_pixel_width = CellMatrix::getCellSize();
-        int cell_pixel_height = CellMatrix::getCellSize();
+        int cellSize = CellMatrix::getCellSize();
         
         unsigned int i,j;
         
-        for(j = 0; j < cells.getHeight(); j++){
-            for(i = 0; i < cells.getWidth(); i++){
+        unsigned int start_i = calculate_Cell_X(getX(),cells);
+        unsigned int start_j = calculate_Cell_Y(getY(),cells);
+        
+        unsigned int end_i = calculate_Cell_X(getX() + getWidth(),cells);
+        unsigned int end_j = calculate_Cell_Y(getY() + getHeight(),cells);
+        
+        for(j = start_j; j < end_j; j++){
+            for(i = start_i; i < end_i; i++){
                 
-                SDL_Rect rect = {i*cell_pixel_width,
-                                 j*cell_pixel_height,
-                                 cell_pixel_width,
-                                 cell_pixel_height};
+                SDL_Rect rect = {(i - start_i)*cellSize,
+                                 (j - start_j)*cellSize,
+                                 cellSize,
+                                 cellSize};
                 
-                rect.x -= getX();
-                rect.y -= getY();
-                
-                if((cells.getCellIndex(i,j))->is_frozen){
+                if(cells.getCellIndex(i,j) != NULL && (cells.getCellIndex(i,j))->is_frozen){
                     SDL_FillRect(getSurface(), &rect, COLOR_BLACK);
                     rect.x += 1;
                     rect.y += 1;
@@ -171,20 +252,9 @@ public:
 static CellMatrix cells(CELL_WIDTH,CELL_HEIGHT);
 static Window * mainWindow;
 
-
-int calculate_Cell_X(int x){
-	return  x/(mainWindow->getWidth()/cells.getWidth());
-}
-
-int calculate_Cell_Y(int y){
-	return y/(mainWindow->getHeight()/cells.getHeight());
-}
-
-void toggle_Cell(int mouse_x, int mouse_y){
-	int i = calculate_Cell_X(mouse_x);
-	int j = calculate_Cell_Y(mouse_y);
-    (cells.getCellIndex(i,j))->is_frozen ^= 1;
-}
+// TODO abstract out to EntityManager
+static std::vector<Entity *> entities;
+static Entity *playerEntity;
 
 
 void exit_Game(){
@@ -196,7 +266,15 @@ int main( int argc, char* args[] ){
     
     srand ( time(NULL) );
     
-    mainWindow = new Window(0,0,SCREEN_WIDTH,SCREEN_HEIGHT,3000,3000);
+    mainWindow = new Window(0,0,SCREEN_WIDTH,SCREEN_HEIGHT,
+                            CELL_WIDTH*CellMatrix::getCellSize(),
+                            CELL_HEIGHT*CellMatrix::getCellSize()); //TODO fix this
+    
+    SDL_Rect playerRect = {40,40,20,20};
+    playerEntity = new Entity(playerRect);
+    entities.push_back(playerEntity);
+    
+    SDL_EnableKeyRepeat(1, 5);
     
 	int is_game = 1;
     
@@ -204,10 +282,6 @@ int main( int argc, char* args[] ){
 		SDL_Event event;
 		while ( SDL_PollEvent(&event) ) {
 			switch (event.type) {
-				case SDL_MOUSEBUTTONDOWN:
-					toggle_Cell(event.button.x, event.button.y);
-					break;
-                    
                 case SDL_KEYDOWN:
                     if(event.key.keysym.sym == SDLK_LEFT)
                         mainWindow->scrollHorizonally(-1*SCROLL_AMOUNT);
@@ -225,7 +299,20 @@ int main( int argc, char* args[] ){
 			}
 		}
         
+        //physics
+        for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
+            
+            ((Entity *)(*it))->vy += 0.01; // TODO define gravity;
+            ((Entity *)(*it))->y += ((Entity *)(*it))->vy;
+            
+        }
+        
+        mainWindow->renderStart();
 		mainWindow->renderCells(cells);
+        for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
+            ((Entity *)(*it))->render(mainWindow->getSurface());
+        }
+        
         mainWindow->renderFinish();
 		SDL_Delay( MAIN_LOOP_DELAY );
 	}

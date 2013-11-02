@@ -2,8 +2,8 @@
 #install libsdl
 
 CC=g++
-CFLAGS=-I/opt/local/include -framework Cocoa -Wall -mmacosx-version-min=10.5
-LDFLAGS=-lSDL -lSDLmain -I/opt/local/lib
+CFLAGS=-I/opt/local/include -framework Cocoa -g -Wall -mmacosx-version-min=10.5
+LDFLAGS=-lSDL -lSDLmain -I/opt/local/lib 
 
 all : blox
 
