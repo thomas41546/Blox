@@ -12,6 +12,7 @@
 #include <boost/foreach.hpp>
 #include <assert.h>
 #include <vector>
+#include <math.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -58,6 +59,7 @@ public:
         unsigned i,j;
         for(j = 0; j < height; j++){
             for(i = 0; i < width; i++){
+                /*
                 if(rand() % 50 == 0)
                     (getCellIndex(i,j))->is_frozen = 1;
                 else{
@@ -70,6 +72,12 @@ public:
                         if(getCellIndex(i+1,j+1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
                     }
                 }
+                 */
+                if(sqrt((i - 40)*(i -40)+ (j - 40)*(j - 40)) < 20)
+                    (getCellIndex(i,j))->is_frozen = 0;
+                else
+                    (getCellIndex(i,j))->is_frozen = 1;
+              
             }
         }
         
@@ -99,13 +107,33 @@ public:
         return getCellIndex(x,y);
     }
     
+    SDL_Rect getCellRectByPixel(unsigned int x, unsigned int y){
+        x /= CellMatrix::getCellSize();
+        y /= CellMatrix::getCellSize();
+        Cell * cell = getCellIndex(x,y);
+        
+        SDL_Rect rect = {x*CellMatrix::getCellSize(), y*CellMatrix::getCellSize(),
+                         CellMatrix::getCellSize(), CellMatrix::getCellSize()};
+        return rect;
+    }
+    
     ~CellMatrix(){
         delete[] matrix;
     }
 };
 
-class EntityManager{
+
+int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
+{
+    if ((box2.x>box1.x)&&((box1.x+box1.w)>box2.x))
+        if ((box2.y>box1.y)&&((box1.y+box1.h)>box2.y)) return 1;
     
+    return 0;
+}
+
+
+
+class EntityManager{
     
 };
 
@@ -114,16 +142,18 @@ class Entity{
     public:
         //TODO encapsulate
         unsigned int width,height;
-        float vx,vy;
-        float x,y;
+        double vx,vy;
+        double x,y;
+        bool hitGround;
     
         Entity(SDL_Rect _dimensions){
-            x = (float)_dimensions.x;
-            y = (float)_dimensions.y;
+            x = (double)_dimensions.x;
+            y = (double)_dimensions.y;
             width = _dimensions.w;
             height = _dimensions.h;
             vx = 0;
             vy = 0;
+            hitGround = false;
         }
     
         SDL_Rect getRect(){
@@ -131,8 +161,10 @@ class Entity{
             return rect;
         }
     
-        void render(SDL_Surface* surface){
+        void render(SDL_Surface* surface, int offsetX, int offsetY){
             SDL_Rect rect = getRect();
+            rect.x -= offsetX;
+            rect.y -= offsetY;
             SDL_FillRect(surface, &rect, COLOR_BLACK);
         }
     
@@ -241,6 +273,12 @@ public:
             }
         }
     }
+    void renderEntities(std::vector<Entity *> entities){
+        for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
+            ((Entity *)(*it))->render(getSurface(),getX(),getY());
+        }
+    }
+    
     void renderFinish(){
          SDL_Flip(getSurface() );
     }
@@ -267,9 +305,14 @@ int main( int argc, char* args[] ){
                             CELL_WIDTH*CellMatrix::getCellSize(),
                             CELL_HEIGHT*CellMatrix::getCellSize()); //TODO fix this
     
-    SDL_Rect playerRect = {40,40,20,20};
+    SDL_Rect playerRect = {500,500,20,20};
     playerEntity = new Entity(playerRect);
     entities.push_back(playerEntity);
+    
+    for(int i = 0; i < 1000; i++){
+        SDL_Rect npcRect = {rand()%1000,rand()%1000,3,3};
+        entities.push_back(new Entity(npcRect));
+    }
     
     SDL_EnableKeyRepeat(1, 5);
     
@@ -292,13 +335,16 @@ int main( int argc, char* args[] ){
 			switch (event.type) {
                 case SDL_KEYDOWN:
                     if(event.key.keysym.sym == SDLK_LEFT)
-                        mainWindow->scrollHorizonally(-1*SCROLL_AMOUNT);
+                        playerEntity->vx -= 0.3;
                     else if(event.key.keysym.sym == SDLK_RIGHT)
-                        mainWindow->scrollHorizonally(SCROLL_AMOUNT);
-                    else if(event.key.keysym.sym == SDLK_UP)
-                        mainWindow->scrollVertically(-1*SCROLL_AMOUNT);
+                        playerEntity->vx += 0.3;
+                    
+                    else if(event.key.keysym.sym == SDLK_UP){
+                        if(abs(playerEntity->vy) < 0.01 && playerEntity->hitGround)
+                            playerEntity->vy -= 3;
+                    }
                     else if(event.key.keysym.sym == SDLK_DOWN)
-                        mainWindow->scrollVertically(SCROLL_AMOUNT);
+                        playerEntity->y += SCROLL_AMOUNT;
                     break;
                     
 				case SDL_QUIT:
@@ -306,21 +352,120 @@ int main( int argc, char* args[] ){
 					break;
 			}
 		}
+        //npc
+         for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
+             Entity * npc =  ((Entity *)(*it));
+             if(npc == playerEntity) continue;
+             
+             if(npc->hitGround){
+                 if(playerEntity->x < npc->x){
+                     npc->vx += 100;
+                 }
+                 if(playerEntity->x > npc->x){
+                     npc->vx += 100;
+                 }
+                 //npc->vy = -1*rand() % 8;
+                // npc->vx += ((double)(rand() % 100 - 50))/5;
+             }
+         }
         
         //physics
         for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
             
-            ((Entity *)(*it))->vy += 0.01; // TODO define gravity;
-            ((Entity *)(*it))->y += ((Entity *)(*it))->vy;
-             mainWindow->setXY(((Entity *)(*it))->x,((Entity *)(*it))->y);
+            ((Entity *)(*it))->vy += 0.1;
+            ((Entity *)(*it))->vx *= 0.90;
+            
+            SDL_Rect entityRect;
+            
+            
+            entityRect = ((Entity *)(*it))->getRect();
+            entityRect.y += ((Entity *)(*it))->vy;
+            
+            
+            bool collidedY = false;
+            bool collidedX = false;
+            int i,j;
+            for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
+                for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
+                    if( cells.getCellByPixel(i,j)!= NULL && cells.getCellByPixel(i,j)->is_frozen){
+                        
+                        if(((Entity *)(*it))->vy > 0.1){((Entity *)(*it))->vy -= 0.1;}
+                        ((Entity *)(*it))->y -= (((Entity *)(*it))->vy);
+                        
+                        //above
+                        if(j <= (entityRect.y + entityRect.h/2)){
+                            if(((Entity *)(*it))->vy < 0)
+                                ((Entity *)(*it))->vy = 0;
+                        }
+                        else{  //below
+                          
+                            if(((Entity *)(*it))->vy > 0){
+                                ((Entity *)(*it))->vy = 0;
+                                ((Entity *)(*it))->hitGround = true;
+                            }
+                        }
+                        collidedY = true;
+                    }
+                }
+            }
+            if(collidedY){
+                   printf("collision Y\n");
+                    
+            }
+            else{
+                ((Entity *)(*it))->hitGround = false;
+            }
+            
+            entityRect = ((Entity *)(*it))->getRect();
+            entityRect.x += ((Entity *)(*it))->vx;
+            for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
+                for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
+                    if( cells.getCellByPixel(i,j)!= NULL && cells.getCellByPixel(i,j)->is_frozen){
+                        
+                        ((Entity *)(*it))->x -= ((Entity *)(*it))->vx;
+                        
+                        //left
+                        if(i <= (entityRect.x + entityRect.w/2)){
+                            if(((Entity *)(*it))->vx < 0)
+                                ((Entity *)(*it))->vx = 0;
+                        }
+                        else{  //right
+                            
+                            if(((Entity *)(*it))->vx > 0){
+                                ((Entity *)(*it))->vx = 0;
+                            }
+                        }
+                        collidedX = true;
+                    }
+                }
+            }
+            if(collidedX){
+                 printf("collision X\n");
+            }
+            
+            if(!collidedX)
+                ((Entity *)(*it))->x += ((Entity *)(*it))->vx;
+            
+            if(!collidedY)
+                ((Entity *)(*it))->y += ((Entity *)(*it))->vy;
+            
+            continue;
+            //nothing
             
         }
         
+        // set window position
+        //TODO make this a moving window when you get to the sides
+        int nx,ny;
+        nx = playerEntity->x - (int)500;
+        ny = playerEntity->y - (int)500;
+        if(nx < 0) nx = 0;
+        if(ny < 0) ny = 0;
+        //mainWindow->setXY((nx/2)*2,(ny/2)*2);
+        
         mainWindow->renderStart();
 		mainWindow->renderCells(cells);
-        for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
-            ((Entity *)(*it))->render(mainWindow->getSurface());
-        }
+        mainWindow->renderEntities(entities);
         
         mainWindow->renderFinish();
 		SDL_Delay( 0 );

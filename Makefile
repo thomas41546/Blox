@@ -10,7 +10,7 @@ all : blox
 blox : blox.cpp
 	$(CC) blox.cpp $(LDFLAGS) $(CFLAGS) -o blox
 
-run : blox
+run : blox.cpp blox
 	-./blox
 
 clean :
