@@ -25,13 +25,12 @@ const int COLOR_RED2 =     0xEE0000;
 const int COLOR_BLUE =  0x33CCFF;
 const int COLOR_GREEN =   0x00FF00;
 
-
 const int CELL_WIDTH =   120;
 const int CELL_HEIGHT =   80;
 const int SCREEN_WIDTH =   1200;
 const int SCREEN_HEIGHT =   800;
 
-const int SCROLL_AMOUNT = 100;
+const int SCROLL_AMOUNT = 1;
 
 const int MAIN_LOOP_DELAY =   10;
 
@@ -45,19 +44,29 @@ class Cell{
 class CellMatrix {
     private:
         Cell * matrix;
-        unsigned int width;
-        unsigned int height;
+        unsigned int width;  //unit cell
+        unsigned int height; //unit cell
     
     public:
         CellMatrix(unsigned int _width, unsigned int _height){
             width = _width;
             height = _height;
             matrix = new Cell[width*height]();
+            
+            unsigned i,j;
+            for(j = 0; j < height; j++){
+                for(i = 0; i < width; i++){
+                    (getCellIndex(i,j))->is_frozen = 0;
+                }
+            }
         }
+    
+        // pixel units
+        static unsigned int getCellSize() {return 10;}
     
         unsigned int getWidth () {return width;}
         unsigned int getHeight () {return height;}
-        
+    
         Cell * getCellIndex(unsigned int x, unsigned int y){
             if (y >= 0 && x < width && y >= 0 && y < height){
                 return &(matrix[x + y*width]);
@@ -66,13 +75,17 @@ class CellMatrix {
                 return NULL;
             }
         }
+    
+        ~CellMatrix(){
+            delete[] matrix;
+        }
 };
 
 class Window {
     private:
         unsigned int x;
         unsigned int y;
-        
+    
         unsigned int width;
         unsigned int height;
     
@@ -120,17 +133,17 @@ static Window mainWindow(0,0,100,100,3000,3000);
 
 
 int calculate_Cell_X(int x){
-	return  x/(screen.width/cells.width);
+	return  x/(screen.width/cells.getWidth());
 }
 
 int calculate_Cell_Y(int y){
-	return y/(screen.height/cells.height);
+	return y/(screen.height/cells.getHeight());
 }
 
 void toggle_Cell(int mouse_x, int mouse_y){
 	int i = calculate_Cell_X(mouse_x);
 	int j = calculate_Cell_Y(mouse_y);
-	(cells.array + j*cells.width + i)->is_frozen ^= 1;
+    (cells.getCellIndex(i,j))->is_frozen ^= 1;
 }
 
 
@@ -139,38 +152,44 @@ void render_Screen(){
 	SDL_FillRect(screen.surface, &rect, COLOR_WHITE);
 	
 	
-	int cell_pixel_width = screen.width/cells.width;
-	int cell_pixel_height = screen.height/cells.height;
+	int cell_pixel_width = screen.width/cells.getWidth();
+	int cell_pixel_height = screen.height/cells.getHeight();
 	
 	unsigned int i,j;
 	
-	for(j = 0; j < cells.height; j++){
-		for(i = 0; i < cells.width; i++){
+	for(j = 0; j < cells.getHeight(); j++){
+		for(i = 0; i < cells.getWidth(); i++){
 			
 			SDL_Rect rect = {i*cell_pixel_width,j*cell_pixel_height,
 							 cell_pixel_width,cell_pixel_height};
+            
+            rect.x -= mainWindow.getX();
+            rect.y -= mainWindow.getY();
+
 			
-			if((cells.array + j*cells.width + i)->is_frozen){
-                SDL_FillRect(screen.surface, &rect, COLOR_RED);
-			}
-			else{
+			if((cells.getCellIndex(i,j))->is_frozen){
+                SDL_FillRect(screen.surface, &rect, COLOR_BLACK);
+                rect.x += 1;
+                rect.y += 1;
+                rect.w -= 2;
+                rect.h -= 2;
 				SDL_FillRect(screen.surface, &rect, COLOR_WHITE);
 			}
+			else{
+                SDL_FillRect(screen.surface, &rect, COLOR_WHITE);
+			}
 		}
-		
 	}
 	
     SDL_Flip( screen.surface );
 }
 
 void exit_Game(){
-	free(cells.array);
 	SDL_Quit();
 	exit(0);
 }
 
 int main( int argc, char* args[] ){
-	unsigned int i,j;
 
     std::string hello( "Hello, world!" );
     BOOST_FOREACH( char ch, hello )
@@ -185,16 +204,6 @@ int main( int argc, char* args[] ){
 	screen.width = SCREEN_WIDTH;
 	screen.height = SCREEN_HEIGHT;
     screen.surface = SDL_SetVideoMode( screen.width, screen.height, 24, SDL_SWSURFACE );
-	
-	cells.width = CELL_WIDTH;
-	cells.height = CELL_HEIGHT;
-	cells.array = (Cell *)malloc(sizeof(Cell)*cells.width*cells.height);
-
-	for(j = 0; j < cells.height; j++){
-		for(i = 0; i < cells.width; i++){
-			(cells.array + j*cells.width + i)->is_frozen = 0;
-		}
-	}
 	
 	int is_game = 1;
     
