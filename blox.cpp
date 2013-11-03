@@ -32,9 +32,9 @@ const int CELL_HEIGHT =   400;
 const int SCREEN_WIDTH =   1200;
 const int SCREEN_HEIGHT =   800;
 
-const int SCROLL_AMOUNT = 5;
-
 const int MAIN_LOOP_DELAY =   10;
+
+const int MAX_VELOCITY = 9;
 
 
 class Cell{
@@ -71,9 +71,9 @@ public:
                         if(getCellIndex(i-1,j-1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
                         if(getCellIndex(i+1,j+1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
                     }
-                }
-                 */
-                if(sqrt((i - 40)*(i -40)+ (j - 40)*(j - 40)) < 20)
+                }*/
+                 
+                if(sqrt((i - 40)*(i -40)+ (j - 40)*(j - 40)) < 40)
                     (getCellIndex(i,j))->is_frozen = 0;
                 else
                     (getCellIndex(i,j))->is_frozen = 1;
@@ -139,12 +139,21 @@ class EntityManager{
 
 
 class Entity{
+    protected:
+            bool dead;
     public:
+    
+        enum EntityType { NPC,PLAYER,BULLET,DEFAULT };
+    
         //TODO encapsulate
         unsigned int width,height;
         double vx,vy;
         double x,y;
         bool hitGround;
+    
+        static bool isEntityDead(Entity * e){
+            return e->isDead();
+        }
     
         Entity(SDL_Rect _dimensions){
             x = (double)_dimensions.x;
@@ -154,21 +163,124 @@ class Entity{
             vx = 0;
             vy = 0;
             hitGround = false;
+            dead = false;
         }
     
         SDL_Rect getRect(){
             SDL_Rect rect = {(unsigned int)x, (unsigned int)y, width,height};
             return rect;
         }
+        void setDead(){
+            dead = true;
+        }
+        bool isDead(){
+            return dead;
+        }
     
-        void render(SDL_Surface* surface, int offsetX, int offsetY){
+        virtual EntityType getType(){
+            return DEFAULT;
+        }
+        
+        virtual void render(SDL_Surface* surface, int offsetX, int offsetY){
             SDL_Rect rect = getRect();
             rect.x -= offsetX;
             rect.y -= offsetY;
             SDL_FillRect(surface, &rect, COLOR_BLACK);
         }
     
+        virtual void applyGravity(float mag){
+            vy += mag;
+        }
+    
+        virtual void applyHorizontalDrag(float mag){
+            vx *= mag;
+        }
+    
+        virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
+        }
+     
+    
 };
+
+class PlayerEntity: public Entity
+{
+public:
+    PlayerEntity(SDL_Rect _dimensions) : Entity(_dimensions){
+
+    }
+    
+    virtual void render(SDL_Surface* surface, int offsetX, int offsetY){
+        SDL_Rect rect = getRect();
+        rect.x -= offsetX;
+        rect.y -= offsetY;
+        SDL_FillRect(surface, &rect, COLOR_RED);
+    }
+    virtual EntityType getType(){
+        return PLAYER;
+    }
+};
+static PlayerEntity *playerEntity;
+
+
+class NPCEntity: public Entity
+{
+public:
+    NPCEntity(SDL_Rect _dimensions) : Entity(_dimensions){
+        
+    }
+    
+    virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
+        if(abs(vy) < 0.01 &&  abs(vx) < 0.01 && hitGround){
+            vy -= rand()% 6 + 1;
+            if(playerEntity->x < x)
+                vx = -1*rand()% 8;
+            else if(playerEntity->x > x)
+                vx = rand()% 8;
+        }
+    }
+    virtual EntityType getType(){
+        return NPC;
+    }
+};
+
+class BulletEntity: public Entity
+{
+private:
+    unsigned int lifetime;
+    static const unsigned int BULLET_LIFE = 500;
+
+public:
+    BulletEntity(SDL_Rect _dimensions) : Entity(_dimensions){
+        lifetime = BULLET_LIFE; //x * fps
+    } 
+    
+    virtual void render(SDL_Surface* surface, int offsetX, int offsetY){
+        SDL_Rect rect = getRect();
+        rect.x -= offsetX;
+        rect.y -= offsetY;
+        SDL_FillRect(surface, &rect, COLOR_GREEN);
+    }
+    
+    virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
+        lifetime -= 1;
+        if(lifetime == 0){
+            setDead();
+        }
+    }
+        
+    
+    virtual void applyGravity(float mag){
+    }
+    
+    virtual void applyHorizontalDrag(float mag){
+    }
+    
+    virtual EntityType getType(){
+        return BULLET;
+    }
+};
+
+
 
 // TODO convert x,y,width,height to SDL_Rect
 class Window {
@@ -284,20 +396,22 @@ public:
     }
 };
 
-static CellMatrix cells(CELL_WIDTH,CELL_HEIGHT);
-static Window * mainWindow;
-
-// TODO abstract out to EntityManager
-static std::vector<Entity *> entities;
-static Entity *playerEntity;
-
-
 void exit_Game(){
 	SDL_Quit();
 	exit(0);
 }
 
+
 int main( int argc, char* args[] ){
+    
+    static CellMatrix cells(CELL_WIDTH,CELL_HEIGHT);
+    static Window * mainWindow;
+    
+    // TODO abstract out to EntityManager
+    static std::vector<Entity *> entities;
+    
+    
+    SDL_WM_SetCaption("Blox", "Blox");
     
     srand ( time(NULL) );
     
@@ -306,12 +420,12 @@ int main( int argc, char* args[] ){
                             CELL_HEIGHT*CellMatrix::getCellSize()); //TODO fix this
     
     SDL_Rect playerRect = {500,500,20,20};
-    playerEntity = new Entity(playerRect);
-    entities.push_back(playerEntity);
+    playerEntity = new PlayerEntity(playerRect);
+    entities.push_back((Entity *)playerEntity);
     
-    for(int i = 0; i < 1000; i++){
-        SDL_Rect npcRect = {rand()%1000,rand()%1000,3,3};
-        entities.push_back(new Entity(npcRect));
+    for(int i = 0; i < 10000; i++){
+        SDL_Rect npcRect = {rand()%200 + 300,rand()%200 + 300,11,11};
+        entities.push_back(new NPCEntity(npcRect));
     }
     
     SDL_EnableKeyRepeat(1, 5);
@@ -323,7 +437,7 @@ int main( int argc, char* args[] ){
 	while(is_game){
         unsigned int curTime = SDL_GetTicks();
         if(curTime - lastTime >= 1000){
-            printf("FPS: %d\n",fps);
+            printf("FPS/%d Entities/%ld\n",fps,entities.size());
             lastTime = curTime;
             fps = 0;
         }else{
@@ -343,8 +457,19 @@ int main( int argc, char* args[] ){
                         if(abs(playerEntity->vy) < 0.01 && playerEntity->hitGround)
                             playerEntity->vy -= 3;
                     }
-                    else if(event.key.keysym.sym == SDLK_DOWN)
-                        playerEntity->y += SCROLL_AMOUNT;
+                    else if(event.key.keysym.sym == SDLK_SPACE){
+                        
+                        for(float rad = 0; rad < 6.28; rad += 0.02){
+                            SDL_Rect bulletRect = {playerEntity->x,playerEntity->y,5,5};
+                            BulletEntity * bullet =new BulletEntity(bulletRect);
+                            bullet->vx = cos(rad + (rand() % 100)/100.0)*9;
+                            bullet->vy = sin(rad + (rand() % 100)/100.0)*9;
+                            
+                            entities.push_back(bullet);
+                        }
+                        
+                    }
+                        
                     break;
                     
 				case SDL_QUIT:
@@ -352,35 +477,35 @@ int main( int argc, char* args[] ){
 					break;
 			}
 		}
-        //npc
+        
+        // Erase dead entities
+        entities.erase( std::remove_if(entities.begin(), entities.end(), Entity::isEntityDead), entities.end() );
+        
+        //AI
          for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
-             Entity * npc =  ((Entity *)(*it));
-             if(npc == playerEntity) continue;
-             
-             if(npc->hitGround){
-                 if(playerEntity->x < npc->x){
-                     npc->vx += 100;
-                 }
-                 if(playerEntity->x > npc->x){
-                     npc->vx += 100;
-                 }
-                 //npc->vy = -1*rand() % 8;
-                // npc->vx += ((double)(rand() % 100 - 50))/5;
-             }
+             Entity * entity =  ((Entity *)(*it));
+             entity->applyAI(entities,cells);
          }
         
         //physics
         for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
             
-            ((Entity *)(*it))->vy += 0.1;
-            ((Entity *)(*it))->vx *= 0.90;
             
+            ((Entity *)(*it))->applyGravity(0.1);
+            ((Entity *)(*it))->applyHorizontalDrag(0.9);
+            
+            if(((Entity *)(*it))->vy > MAX_VELOCITY) ((Entity *)(*it))->vy = MAX_VELOCITY;
+            else if(((Entity *)(*it))->vy < -1*MAX_VELOCITY) ((Entity *)(*it))->vy = -1*MAX_VELOCITY;
+            
+            if(((Entity *)(*it))->vx > MAX_VELOCITY) ((Entity *)(*it))->vx = MAX_VELOCITY;
+            else if(((Entity *)(*it))->vx < -1*MAX_VELOCITY) ((Entity *)(*it))->vx = -1*MAX_VELOCITY;
+                
             SDL_Rect entityRect;
             
             
             entityRect = ((Entity *)(*it))->getRect();
             entityRect.y += ((Entity *)(*it))->vy;
-            
+            entityRect.x += ((Entity *)(*it))->vx;
             
             bool collidedY = false;
             bool collidedX = false;
@@ -389,56 +514,47 @@ int main( int argc, char* args[] ){
                 for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
                     if( cells.getCellByPixel(i,j)!= NULL && cells.getCellByPixel(i,j)->is_frozen){
                         
-                        if(((Entity *)(*it))->vy > 0.1){((Entity *)(*it))->vy -= 0.1;}
-                        ((Entity *)(*it))->y -= (((Entity *)(*it))->vy);
+                        if(((Entity *)(*it))->getType() == Entity::BULLET){
+                            cells.getCellByPixel(i,j)->is_frozen = 0;
+                            ((Entity *)(*it))->setDead();
+                            goto NEXT_ITERATION;
+                        }
                         
                         //above
                         if(j <= (entityRect.y + entityRect.h/2)){
-                            if(((Entity *)(*it))->vy < 0)
-                                ((Entity *)(*it))->vy = 0;
+                            if(((Entity *)(*it))->vy < 0){
+                                ((Entity *)(*it))->vy *= -0.1;
+                                collidedY = true;
+                            }
                         }
                         else{  //below
                           
                             if(((Entity *)(*it))->vy > 0){
-                                ((Entity *)(*it))->vy = 0;
+                                ((Entity *)(*it))->vy  *= -0.1;
                                 ((Entity *)(*it))->hitGround = true;
+                                collidedY = true;
                             }
                         }
-                        collidedY = true;
-                    }
-                }
-            }
-            if(collidedY){
-                    
-            }
-            else{
-                ((Entity *)(*it))->hitGround = false;
-            }
-            
-            entityRect = ((Entity *)(*it))->getRect();
-            entityRect.x += ((Entity *)(*it))->vx;
-            for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
-                for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
-                    if( cells.getCellByPixel(i,j)!= NULL && cells.getCellByPixel(i,j)->is_frozen){
-                        
-                        ((Entity *)(*it))->x -= ((Entity *)(*it))->vx;
-                        
                         //left
                         if(i <= (entityRect.x + entityRect.w/2)){
-                            if(((Entity *)(*it))->vx < 0)
-                                ((Entity *)(*it))->vx = 0;
+                            if(((Entity *)(*it))->vx < 0){
+                                ((Entity *)(*it))->vx  *= -0.1;
+                                   collidedX = true;
+                            }
                         }
                         else{  //right
                             
                             if(((Entity *)(*it))->vx > 0){
-                                ((Entity *)(*it))->vx = 0;
+                                ((Entity *)(*it))->vx  *= -0.1;
+                                collidedX = true;
                             }
                         }
-                        collidedX = true;
+                        
                     }
                 }
             }
-            if(collidedX){
+            if(!collidedY){
+                  ((Entity *)(*it))->hitGround = false;   
             }
             
             if(!collidedX)
@@ -447,6 +563,7 @@ int main( int argc, char* args[] ){
             if(!collidedY)
                 ((Entity *)(*it))->y += ((Entity *)(*it))->vy;
             
+            NEXT_ITERATION:
             continue;
             //nothing
             
@@ -459,7 +576,7 @@ int main( int argc, char* args[] ){
         ny = playerEntity->y - (int)500;
         if(nx < 0) nx = 0;
         if(ny < 0) ny = 0;
-        //mainWindow->setXY((nx/2)*2,(ny/2)*2);
+        mainWindow->setXY(nx,ny);
         
         mainWindow->renderStart();
 		mainWindow->renderCells(cells);
