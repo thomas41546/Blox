@@ -27,8 +27,8 @@ const int COLOR_RED2 =     0xEE0000;
 const int COLOR_BLUE =  0x33CCFF;
 const int COLOR_GREEN =   0x00FF00;
 
-const int CELL_WIDTH =   400;
-const int CELL_HEIGHT =   400;
+const int CELL_WIDTH =   4000;
+const int CELL_HEIGHT =   4000;
 const int SCREEN_WIDTH =   1200;
 const int SCREEN_HEIGHT =   800;
 
@@ -501,7 +501,7 @@ int main( int argc, char* args[] ){
             else if(((Entity *)(*it))->vx < -1*MAX_VELOCITY) ((Entity *)(*it))->vx = -1*MAX_VELOCITY;
                 
             SDL_Rect entityRect;
-            
+             
             
             entityRect = ((Entity *)(*it))->getRect();
             entityRect.y += ((Entity *)(*it))->vy;
