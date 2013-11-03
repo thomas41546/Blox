@@ -48,14 +48,17 @@ bool Entity::isDead(){
  Entity::EntityType PlayerEntity::getType(){
     return PLAYER;
 }
-
+extern  PlayerEntity * playerEntity;
 
 //NPCEntity
 
  void NPCEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
     if(abs(vy) < 0.01 &&  abs(vx) < 0.01 && hitGround){
         vy -= rand()% 6 + 1;
-        vx = rand()% 16 - 8;
+        if(playerEntity->x < x)
+            vx -= rand()% 5 + 3;
+        else if(playerEntity->x > x)
+            vx += rand()% 5 + 3;
     }
 }
  Entity::EntityType NPCEntity::getType(){

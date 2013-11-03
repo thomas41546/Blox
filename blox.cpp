@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <time.h>
 
+PlayerEntity * playerEntity;
+
 
 int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
 {
@@ -153,8 +155,6 @@ void exit_Game(){
 
 
 int main( int argc, char* args[] ){
-    
-    static PlayerEntity * playerEntity;
     static CellMatrix cells(CELL_WIDTH,CELL_HEIGHT);
     static Window * mainWindow;
     
