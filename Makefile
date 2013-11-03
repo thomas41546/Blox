@@ -8,7 +8,7 @@ LDFLAGS=-lSDL -lSDLmain -I/opt/local/lib
 all : blox
 
 blox : blox.cpp
-	$(CC) blox.cpp $(LDFLAGS) $(CFLAGS) -o blox
+	$(CC) *.cpp $(LDFLAGS) $(CFLAGS) -o blox
 
 run : blox.cpp blox
 	-./blox
