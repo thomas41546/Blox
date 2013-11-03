@@ -17,4 +17,6 @@ const int MAIN_LOOP_DELAY =   10;
 
 const int MAX_VELOCITY = 9;
 
+const double MATH_PI = 3.14159;
+
 #endif

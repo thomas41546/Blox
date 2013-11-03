@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:CellMatrix.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:CellMatrix.h">
+   </FileRef>
+   <FileRef
+      location = "group:Entity.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:Entity.h">
+   </FileRef>
+   <FileRef
+      location = "group:Globals.h">
+   </FileRef>
+   <FileRef
+      location = "group:Window.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:Window.h">
+   </FileRef>
+   <FileRef
+      location = "group:Makefile">
+   </FileRef>
+</Workspace>

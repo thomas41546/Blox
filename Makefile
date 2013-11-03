@@ -7,7 +7,7 @@ LDFLAGS=-lSDL -lSDLmain -I/opt/local/lib
 
 all : blox
 
-blox : blox.cpp Entity.cpp CellMatrix.cpp Entity.h CellMatrix.h Globals.h
+blox : blox.cpp  Window.cpp Entity.cpp CellMatrix.cpp Entity.h CellMatrix.h Globals.h
 	$(CC) *.cpp $(LDFLAGS) $(CFLAGS) -o blox
 
 run : blox.cpp blox

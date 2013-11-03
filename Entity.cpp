@@ -1,6 +1,17 @@
 #include "Globals.h"
 #include "Entity.h"
 
+Entity::Entity(SDL_Rect _dimensions){
+    x = (double)_dimensions.x;
+    y = (double)_dimensions.y;
+    width = _dimensions.w;
+    height = _dimensions.h;
+    vx = 0;
+    vy = 0;
+    hitGround = false;
+    dead = false;
+};
+
 SDL_Rect Entity::getRect(){
     SDL_Rect rect = {(unsigned int)x, (unsigned int)y, width,height};
     return rect;
@@ -65,8 +76,6 @@ extern  PlayerEntity * playerEntity;
     return NPC;
 }
 
-//WormBodyEntity
-
 
  void WormBodyEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
 }
@@ -88,14 +97,27 @@ extern  PlayerEntity * playerEntity;
     return NPC_WORM;
 }
 
+//WormEntity
+WormEntity::WormEntity(SDL_Rect _dimensions, std::vector<Entity *> & entities) : NPCEntity(_dimensions){
+    for(int i = 0; i < WORM_LENGTH; i++){
+        segments[i] = new WormBodyEntity(_dimensions);
+        segments[i]->x = _dimensions.x - (_dimensions.w+5)*i;
+        segments[i]->y = _dimensions.y;
+        segments[i]->vx = 0;
+        segments[i]->vy = 0;
+        entities.push_back(segments[i]);
+    }
+}
 
  void WormEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
-    static double lastRad = 0.0;
-    if(rand() % 5 == 0)
-        lastRad += 0.1;
-    
-    vx = cos(lastRad)*10;
-    vy = sin(lastRad)*10;
+    static double curAngle = 0;
+     static double lastTargetAngle = 0;
+    static double incrementer = 0.1;
+     
+    lastTargetAngle = atan2 (playerEntity->y - y ,playerEntity->x - x);
+     
+    vx = cos(lastTargetAngle)*10;
+    vy = sin(lastTargetAngle)*10;
     
     segments[0]->vx = (x -segments[0]->x)/WORM_SPACING_DIVIDER;
     segments[0]->vy = (y -segments[0]->y)/WORM_SPACING_DIVIDER;
@@ -123,10 +145,10 @@ extern  PlayerEntity * playerEntity;
     return NPC_WORM;
 }
 
-
-
 //BulletEntity
-
+BulletEntity::BulletEntity(SDL_Rect _dimensions) : Entity(_dimensions){
+    lifetime = BULLET_LIFE; //x * fps
+}
 
  void BulletEntity::render(SDL_Surface* surface, int offsetX, int offsetY){
     SDL_Rect rect = getRect();

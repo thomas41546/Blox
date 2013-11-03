@@ -62,4 +62,3 @@ SDL_Rect CellMatrix::getCellRectByPixel(unsigned int x, unsigned int y){
         CellMatrix::getCellSize(), CellMatrix::getCellSize()};
     return rect;
 }
-

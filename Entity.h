@@ -31,16 +31,7 @@ public:
         return e->isDead();
     }
     
-    Entity(SDL_Rect _dimensions){
-        x = (double)_dimensions.x;
-        y = (double)_dimensions.y;
-        width = _dimensions.w;
-        height = _dimensions.h;
-        vx = 0;
-        vy = 0;
-        hitGround = false;
-        dead = false;
-    };
+    Entity(SDL_Rect _dimensions);
 
     SDL_Rect getRect();
     void setDead();
@@ -92,16 +83,7 @@ private:
     WormBodyEntity * segments[WORM_LENGTH];
 
 public:
-    WormEntity(SDL_Rect _dimensions, std::vector<Entity *> & entities) : NPCEntity(_dimensions){
-        for(int i = 0; i < WORM_LENGTH; i++){
-            segments[i] = new WormBodyEntity(_dimensions);
-            segments[i]->x = _dimensions.x - (_dimensions.w+5)*i;
-            segments[i]->y = _dimensions.y;
-            segments[i]->vx = 0;
-            segments[i]->vy = 0;
-            entities.push_back(segments[i]);
-        }
-    }
+    WormEntity(SDL_Rect _dimensions, std::vector<Entity *> & entities);
 
     virtual EntityType getType();
     virtual void render(SDL_Surface* surface, int offsetX, int offsetY);
@@ -123,9 +105,7 @@ private:
     static const unsigned int BULLET_LIFE = 500;
     
 public:
-    BulletEntity(SDL_Rect _dimensions) : Entity(_dimensions){
-        lifetime = BULLET_LIFE; //x * fps
-    }
+    BulletEntity(SDL_Rect _dimensions);
     virtual EntityType getType();
     virtual void render(SDL_Surface* surface, int offsetX, int offsetY);
     virtual void applyGravity(float mag);

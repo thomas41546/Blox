@@ -10,6 +10,7 @@
 #include "Globals.h"
 #include "Entity.h"
 #include "CellMatrix.h"
+#include "Window.h"
 
 #include <string>
 #include <iostream>
@@ -35,118 +36,9 @@ int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
 
 
 // TODO convert x,y,width,height to SDL_Rect
-class Window {
-private:
-    unsigned int x;
-    unsigned int y;
-    
-    unsigned int width;
-    unsigned int height;
-    
-    unsigned int maxScrollWidth;
-    unsigned int maxScrollHeight;
-    
-    SDL_Surface* surface;
-    
-public:
-    Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight){
-        x = _x;
-        y = _y;
-        width = _width;
-        height = _height;
-        maxScrollWidth = _maxScrollWidth;
-        maxScrollHeight = _maxScrollHeight;
-        
-        SDL_Init( SDL_INIT_EVERYTHING );
-        surface = SDL_SetVideoMode( width, height, 24, SDL_SWSURFACE );
-    }
-    
-    unsigned int getX () {return x;}
-    unsigned int getY () {return y;}
-    
-    unsigned int getWidth () {return width;}
-    unsigned int getHeight () {return height;}
-    
-    SDL_Surface* getSurface () {return surface;}
-    
-    void scrollHorizonally(int amount) {
-        if(x + amount >= maxScrollWidth) {
-            if(amount <= 0)
-                x = 0;
-            else
-                x = maxScrollWidth-1;
-        }
-        else
-            x += amount;
-    }
-    
-    void scrollVertically(int amount) {
-        if(y + amount >= maxScrollHeight){
-            if(amount <= 0)
-                y = 0;
-            else
-                y = maxScrollHeight-1;
-        }
-        else
-            y += amount;
-    }
-    
-    void setXY(unsigned int _x, unsigned int _y){
-        x = _x;
-        y = _y;
-    }
-    
-    void renderStart(){
-        //blank
-        SDL_Rect rect = {0,0,getWidth(), getHeight()};
-        SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
-    }
-    
-    void renderCells(CellMatrix & cells){
-        
-        
-        unsigned int cellSize = CellMatrix::getCellSize();
-        
-        unsigned int i,j;
-        
-        unsigned int start_i = getX();
-        unsigned int start_j = getY();
-        
-        unsigned int end_i = getX() + getWidth();
-        unsigned int end_j = getY() + getHeight();
-        
-        for(j = start_j; j < end_j; j+= cellSize){
-            for(i = start_i; i < end_i; i+=cellSize){
-                
-                SDL_Rect rect = {(i - start_i),
-                                 (j - start_j),
-                                 cellSize,
-                                 cellSize};
-                
-                if(cells.getCellByPixel(i,j) != NULL && (cells.getCellByPixel(i,j))->is_frozen){
-                    SDL_FillRect(getSurface(), &rect, COLOR_BLACK);
-                    rect.x += 1;
-                    rect.y += 1;
-                    rect.w -= 2;
-                    rect.h -= 2;
-                    SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
-                }
-                else{
-                    SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
-                }
-            }
-        }
-    }
-    void renderEntities(std::vector<Entity *> entities){
-        for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
-            ((Entity *)(*it))->render(getSurface(),getX(),getY());
-        }
-    }
-    
-    void renderFinish(){
-         SDL_Flip(getSurface() );
-    }
-};
+
+
+
 
 void exit_Game(){
 	SDL_Quit();
