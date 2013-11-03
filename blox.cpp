@@ -131,12 +131,6 @@ int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
 }
 
 
-
-class EntityManager{
-    
-};
-
-
 class Entity{
     protected:
             bool dead;
