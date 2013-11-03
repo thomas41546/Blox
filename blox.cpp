@@ -110,7 +110,6 @@ public:
     SDL_Rect getCellRectByPixel(unsigned int x, unsigned int y){
         x /= CellMatrix::getCellSize();
         y /= CellMatrix::getCellSize();
-        Cell * cell = getCellIndex(x,y);
         
         SDL_Rect rect = {x*CellMatrix::getCellSize(), y*CellMatrix::getCellSize(),
                          CellMatrix::getCellSize(), CellMatrix::getCellSize()};
@@ -143,7 +142,7 @@ class Entity{
             bool dead;
     public:
     
-        enum EntityType { NPC,PLAYER,BULLET,DEFAULT };
+        enum EntityType { NPC,NPC_WORM,PLAYER,BULLET,DEFAULT, };
     
         //TODO encapsulate
         unsigned int width,height;
@@ -242,6 +241,96 @@ public:
         return NPC;
     }
 };
+
+class WormBodyEntity: public NPCEntity
+{
+public:
+    WormBodyEntity(SDL_Rect _dimensions) : NPCEntity(_dimensions){
+    }
+    
+    virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
+    }
+    
+    virtual void applyGravity(float mag){
+    }
+    
+    virtual void applyHorizontalDrag(float mag){
+    }
+    
+    virtual void render(SDL_Surface* surface, int offsetX, int offsetY){
+        SDL_Rect rect = getRect();
+        rect.x -= offsetX;
+        rect.y -= offsetY;
+        SDL_FillRect(surface, &rect, COLOR_BLUE);
+    }
+    
+    virtual EntityType getType(){
+        return NPC_WORM;
+    }
+};
+
+class WormEntity: public NPCEntity
+{
+private:
+    static const int WORM_LENGTH = 20;
+    static const int WORM_SPACING_DIVIDER = 5;
+    
+    WormBodyEntity * segments[WORM_LENGTH];
+    
+public:
+    WormEntity(SDL_Rect _dimensions, std::vector<Entity *> & entities) : NPCEntity(_dimensions){
+        for(int i = 0; i < WORM_LENGTH; i++){
+            segments[i] = new WormBodyEntity(_dimensions);
+            segments[i]->x = _dimensions.x - (_dimensions.w+5)*i;
+            segments[i]->y = _dimensions.y;
+            segments[i]->vx = 0;
+            segments[i]->vy = 0;
+            entities.push_back(segments[i]);
+        }
+        
+    }
+    
+    virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
+        static double lastRad = 0.0;
+        if(rand() % 5 == 0)
+            lastRad += 0.1;
+        
+        vx = cos(lastRad)*10;
+        vy = sin(lastRad)*10;
+        
+        segments[0]->vx = (x -segments[0]->x)/WORM_SPACING_DIVIDER;
+        segments[0]->vy = (y -segments[0]->y)/WORM_SPACING_DIVIDER;
+        for(int i = 1; i < WORM_LENGTH; i++){
+            segments[i]->vx = (segments[i-1]->x -segments[i]->x)/WORM_SPACING_DIVIDER;
+            segments[i]->vy = (segments[i-1]->y -segments[i]->y)/WORM_SPACING_DIVIDER;
+        }
+    }
+    
+    
+    virtual void applyGravity(float mag){
+    }
+    
+    virtual void applyHorizontalDrag(float mag){
+    }
+    
+    virtual void render(SDL_Surface* surface, int offsetX, int offsetY){
+        SDL_Rect rect = getRect();
+        rect.x -= offsetX;
+        rect.y -= offsetY;
+        SDL_FillRect(surface, &rect, COLOR_BLUE);
+    }
+    
+    virtual EntityType getType(){
+        return NPC_WORM;
+    }
+    
+    ~WormEntity(){
+        for(int i = 0; i < WORM_LENGTH; i++){
+            segments[i]->setDead();
+        }
+    }
+};
+
 
 class BulletEntity: public Entity
 {
@@ -423,6 +512,9 @@ int main( int argc, char* args[] ){
     playerEntity = new PlayerEntity(playerRect);
     entities.push_back((Entity *)playerEntity);
     
+    SDL_Rect wormRect = {500,500,40,40};
+    entities.push_back(new WormEntity(wormRect,entities));
+    
     for(int i = 0; i < 10000; i++){
         SDL_Rect npcRect = {rand()%200 + 300,rand()%200 + 300,11,11};
         entities.push_back(new NPCEntity(npcRect));
@@ -479,6 +571,7 @@ int main( int argc, char* args[] ){
 		}
         
         // Erase dead entities
+        // TODO verify that correctly deallocates the entity (no memory overflow)
         entities.erase( std::remove_if(entities.begin(), entities.end(), Entity::isEntityDead), entities.end() );
         
         //AI
@@ -493,6 +586,9 @@ int main( int argc, char* args[] ){
             
             ((Entity *)(*it))->applyGravity(0.1);
             ((Entity *)(*it))->applyHorizontalDrag(0.9);
+            
+            if(((Entity *)(*it))->x < 0)((Entity *)(*it))->x = 0;
+            if(((Entity *)(*it))->y < 0)((Entity *)(*it))->y = 0;
             
             if(((Entity *)(*it))->vy > MAX_VELOCITY) ((Entity *)(*it))->vy = MAX_VELOCITY;
             else if(((Entity *)(*it))->vy < -1*MAX_VELOCITY) ((Entity *)(*it))->vy = -1*MAX_VELOCITY;
@@ -519,6 +615,12 @@ int main( int argc, char* args[] ){
                             ((Entity *)(*it))->setDead();
                             goto NEXT_ITERATION;
                         }
+                        
+                        if(((Entity *)(*it))->getType() == Entity::NPC_WORM){
+                            cells.getCellByPixel(i,j)->is_frozen = 0;
+                            continue;
+                        }
+                        
                         
                         //above
                         if(j <= (entityRect.y + entityRect.h/2)){
