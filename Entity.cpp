@@ -10,6 +10,9 @@ Entity::Entity(SDL_Rect _dimensions){
     vy = 0;
     hitGround = false;
     dead = false;
+
+    static int nextid = 0;
+    id = ++nextid;
 };
 
 SDL_Rect Entity::getRect(){
@@ -47,6 +50,19 @@ bool Entity::isDead(){
 }
 
 
+int Entity::getID()
+{
+    return id;
+}
+
+Point2d<float> Entity::getPosition()
+{
+    return Point2d<float>(x,y);
+}
+
+Point2d<float> Entity::getSize(){
+    return Point2d<float>(width,height); //TODO verify this is correct
+}
 
 // PlayerEntity
 
@@ -114,7 +130,10 @@ WormEntity::WormEntity(SDL_Rect _dimensions, std::vector<Entity *> & entities) :
      static double lastTargetAngle = 0;
     static double incrementer = 0.1;
      
-    lastTargetAngle = atan2 (playerEntity->y - y ,playerEntity->x - x);
+    if(rand()% 2 == 0)
+        lastTargetAngle += 0.03;
+     
+    //lastTargetAngle = atan2 (playerEntity->y - y ,playerEntity->x - x);
      
     vx = cos(lastTargetAngle)*10;
     vy = sin(lastTargetAngle)*10;

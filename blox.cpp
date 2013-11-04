@@ -11,6 +11,7 @@
 #include "Entity.h"
 #include "CellMatrix.h"
 #include "Window.h"
+#include "QuadTree.hpp"
 
 #include <string>
 #include <iostream>
@@ -33,13 +34,6 @@ int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
     return 0;
 }
 
-
-
-// TODO convert x,y,width,height to SDL_Rect
-
-
-
-
 void exit_Game(){
 	SDL_Quit();
 	exit(0);
@@ -50,8 +44,11 @@ int main( int argc, char* args[] ){
     static CellMatrix cells(CELL_WIDTH,CELL_HEIGHT);
     static Window * mainWindow;
     
+    
     // TODO abstract out to EntityManager
     static std::vector<Entity *> entities;
+    
+    QuadTree * qt = new QuadTree(Point2d<float>(500,500), Point2d<float>(1000,1000), 0, 5, 100000, NULL);
     
     
     SDL_WM_SetCaption("Blox", "Blox");

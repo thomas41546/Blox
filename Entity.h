@@ -2,6 +2,7 @@
 #define __ENTITY_H_INCLUDED__   
 
 #include "CellMatrix.h"
+#include "Point2d.hpp"
 
 #include "SDL/SDL.h"
 #include <string>
@@ -15,6 +16,7 @@
 #include <stdio.h>
 #include <time.h>
 
+
 class Entity{
 protected:
     bool dead;
@@ -26,6 +28,7 @@ public:
     double vx,vy;
     double x,y;
     bool hitGround;
+    int id;
     
     static bool isEntityDead(Entity * e){
         return e->isDead();
@@ -36,6 +39,11 @@ public:
     SDL_Rect getRect();
     void setDead();
     bool isDead();
+    
+    int getID();
+    Point2d<float> getPosition();
+    Point2d<float> getSize();
+    
     
     virtual EntityType getType();
     

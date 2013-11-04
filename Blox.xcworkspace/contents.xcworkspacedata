@@ -23,6 +23,9 @@
       location = "group:Window.h">
    </FileRef>
    <FileRef
+      location = "group:blox.cpp">
+   </FileRef>
+   <FileRef
       location = "group:Makefile">
    </FileRef>
 </Workspace>
