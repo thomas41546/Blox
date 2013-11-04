@@ -2,30 +2,39 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:CellMatrix.cpp">
+      location = "group:Makefile">
    </FileRef>
    <FileRef
-      location = "group:CellMatrix.h">
+      location = "group:CellMatrix.hpp">
    </FileRef>
    <FileRef
-      location = "group:Entity.cpp">
+      location = "group:Entity.hpp">
    </FileRef>
    <FileRef
-      location = "group:Entity.h">
+      location = "group:Globals.hpp">
    </FileRef>
    <FileRef
-      location = "group:Globals.h">
+      location = "group:Point2d.hpp">
    </FileRef>
    <FileRef
-      location = "group:Window.cpp">
+      location = "group:QuadTree.hpp">
    </FileRef>
    <FileRef
-      location = "group:Window.h">
+      location = "group:Window.hpp">
    </FileRef>
    <FileRef
       location = "group:blox.cpp">
    </FileRef>
    <FileRef
-      location = "group:Makefile">
+      location = "group:CellMatrix.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:Entity.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:QuadTree.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:Window.cpp">
    </FileRef>
 </Workspace>

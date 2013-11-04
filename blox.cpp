@@ -23,9 +23,6 @@
 #include <stdio.h>
 #include <time.h>
 
-PlayerEntity * playerEntity;
-
-
 int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
 {
     if ((box2.x>box1.x)&&((box1.x+box1.w)>box2.x))
@@ -33,6 +30,8 @@ int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
     
     return 0;
 }
+
+PlayerEntity * playerEntity;
 
 void exit_Game(){
 	SDL_Quit();
@@ -129,6 +128,12 @@ int main( int argc, char* args[] ){
          for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
              Entity * entity =  ((Entity *)(*it));
              entity->applyAI(entities,cells);
+             
+             
+             if(entity->getType() != Entity::PLAYER && entity->getType() != Entity::DEFAULT &&
+                collisionDetectRIR(playerEntity->getRect(),entity->getRect())){
+                 printf("collision\n");
+             }
          }
         
         //physics
