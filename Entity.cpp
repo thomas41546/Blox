@@ -126,9 +126,9 @@ WormEntity::WormEntity(SDL_Rect _dimensions, std::vector<Entity *> & entities) :
 }
 
  void WormEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
-    static double curAngle = 0;
-     static double lastTargetAngle = 0;
-    static double incrementer = 0.1;
+    //static double curAngle = 0;
+    static double lastTargetAngle = 0;
+    //static double incrementer = 0.1;
      
     if(rand()% 2 == 0)
         lastTargetAngle += 0.03;

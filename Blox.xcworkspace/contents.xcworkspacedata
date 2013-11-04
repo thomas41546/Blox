@@ -23,9 +23,6 @@
       location = "group:Window.hpp">
    </FileRef>
    <FileRef
-      location = "group:blox.cpp">
-   </FileRef>
-   <FileRef
       location = "group:CellMatrix.cpp">
    </FileRef>
    <FileRef
@@ -36,5 +33,8 @@
    </FileRef>
    <FileRef
       location = "group:Window.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:Blox.cpp">
    </FileRef>
 </Workspace>
