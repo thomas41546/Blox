@@ -14,7 +14,7 @@
 #define QUADTREE_HPP_INCLUDED
 
 #include "Point2d.hpp"
-#include "Entity.h"
+#include "Entity.hpp"
 #include <list>
 #include <cmath>
 

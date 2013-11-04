@@ -1,7 +1,7 @@
-#include "Globals.h"
-#include "CellMatrix.h"
-#include "Entity.h"
-#include "Window.h"
+#include "Globals.hpp"
+#include "CellMatrix.hpp"
+#include "Entity.hpp"
+#include "Window.hpp"
 
 Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight){
     x = _x;

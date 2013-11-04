@@ -7,10 +7,10 @@
 
 #include "SDL/SDL.h"
 
-#include "Globals.h"
-#include "Entity.h"
-#include "CellMatrix.h"
-#include "Window.h"
+#include "Globals.hpp"
+#include "Entity.hpp"
+#include "CellMatrix.hpp"
+#include "Window.hpp"
 #include "QuadTree.hpp"
 
 #include <string>

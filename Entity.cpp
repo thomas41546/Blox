@@ -1,5 +1,5 @@
-#include "Globals.h"
-#include "Entity.h"
+#include "Globals.hpp"
+#include "Entity.hpp"
 
 Entity::Entity(SDL_Rect _dimensions){
     x = (double)_dimensions.x;

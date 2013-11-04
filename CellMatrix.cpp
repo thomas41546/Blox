@@ -1,4 +1,4 @@
-#include "CellMatrix.h"
+#include "CellMatrix.hpp"
 
 CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
     width = _width;

@@ -1,7 +1,7 @@
 #ifndef __ENTITY_H_INCLUDED__   
 #define __ENTITY_H_INCLUDED__   
 
-#include "CellMatrix.h"
+#include "CellMatrix.hpp"
 #include "Point2d.hpp"
 
 #include "SDL/SDL.h"
