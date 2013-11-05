@@ -24,6 +24,12 @@
 #include <stdio.h>
 #include <time.h>
 
+static CellMatrix cells(CELL_WIDTH,CELL_HEIGHT);
+static Window * mainWindow;
+boost::thread * windowFlipThread;
+// TODO abstract out to EntityManager
+static std::vector<Entity *> entities;
+
 int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
 {
     if ((box2.x>box1.x)&&((box1.x+box1.w)>box2.x))
@@ -35,19 +41,20 @@ int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
 PlayerEntity * playerEntity;
 
 void exit_Game(){
+    if(windowFlipThread != NULL)
+        windowFlipThread->interrupt();
 	SDL_Quit();
 	exit(0);
 }
 
+void render_flip(){
+    while(true){
+        mainWindow->renderFinish();
+        usleep(16000); //60fps
+    }
+}
 
 int main( int argc, char* args[] ){
-    static CellMatrix cells(CELL_WIDTH,CELL_HEIGHT);
-    static Window * mainWindow;
-    
-    
-    // TODO abstract out to EntityManager
-    static std::vector<Entity *> entities;
-    
     //QuadTree * qt = new QuadTree(Point2d<float>(500,500), Point2d<float>(1000,1000), 0, 5, 100000, NULL);
     
     
@@ -59,6 +66,9 @@ int main( int argc, char* args[] ){
                             CELL_WIDTH*CellMatrix::getCellSize(),
                             CELL_HEIGHT*CellMatrix::getCellSize()); //TODO fix this
     
+    boost::thread t(boost::bind(&render_flip));
+    windowFlipThread = &t;
+    
     SDL_Rect playerRect = {500,500,20,20};
     playerEntity = new PlayerEntity(playerRect);
     entities.push_back((Entity *)playerEntity);
@@ -66,7 +76,7 @@ int main( int argc, char* args[] ){
     SDL_Rect wormRect = {500,500,40,40};
     entities.push_back(new WormEntity(wormRect,entities));
     
-    for(int i = 0; i < 10000; i++){
+    for(int i = 0; i < 100000; i++){
         SDL_Rect npcRect = {rand()%200 + 300,rand()%200 + 300,11,11};
         entities.push_back(new NPCEntity(npcRect));
     }
@@ -243,22 +253,23 @@ int main( int argc, char* args[] ){
         
         static unsigned int lastRenderTime = 0;
         unsigned int curRenderTime = SDL_GetTicks();
-        
-        if(curRenderTime - lastRenderTime >= 30){
+        if(curRenderTime - lastRenderTime >= 1000/60){
             mainWindow->setXY(nx,ny);
+            
+            mainWindow->lockSurface();
             mainWindow->renderStart();
             mainWindow->renderCells(cells);
             mainWindow->renderEntities(entities);
             mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2%") % lastFps % entities.size()));
-            mainWindow->renderFinish();
+            mainWindow->unlockSurface();
+            
             lastRenderTime = SDL_GetTicks();
         }
-        
-        
-        
+        else{
+            usleep((1000/60 - (curRenderTime - lastRenderTime))*1000);//todo improve this, caps it 50-60 try to make it consitent, corporate mainWIndow draws
+        }
 
 	}
-	printf("You lost the game.\nNoob!\n");
     exit_Game();
 	return 0;
 }

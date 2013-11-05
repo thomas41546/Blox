@@ -13,14 +13,22 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     maxScrollHeight = _maxScrollHeight;
     
     SDL_Init( SDL_INIT_EVERYTHING );
+    
     surface = SDL_SetVideoMode( width, height, 24, SDL_HWSURFACE|SDL_DOUBLEBUF );
     
     assert(TTF_Init() != -1);
     
     font = TTF_OpenFont( "FreeMonoBold.ttf", 25 );
     assert(font != NULL);
-
 };
+
+void Window::lockSurface(){
+    surface_mutex.lock();
+}
+
+void Window::unlockSurface(){
+    surface_mutex.unlock();
+}
 
 unsigned int Window::getX () {return x;}
 unsigned int Window::getY () {return y;}
@@ -60,6 +68,7 @@ void Window::setXY(unsigned int _x, unsigned int _y){
 void Window::renderStart(){
     //blank
     SDL_Rect rect = {0,0,getWidth(), getHeight()};
+    
     SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
 };
 
@@ -72,7 +81,9 @@ void Window::renderFont(int ox, int oy, std::string text){
     assert(message != NULL);
     
     SDL_Rect offset = {ox,oy,0,0};
+    
     SDL_BlitSurface( message, NULL, getSurface(), &offset );
+    
     SDL_FreeSurface(message);
 };
 
@@ -104,6 +115,7 @@ void Window::renderCells(CellMatrix & cells){
                 rect.w -= 2;
                 rect.h -= 2;
                 SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
+                
             }
         }
     }
@@ -116,5 +128,7 @@ void Window::renderEntities(std::vector<Entity *> entities){
 };
 
 void Window::renderFinish(){
+   surface_mutex.lock();
    SDL_Flip(getSurface() );
+   surface_mutex.unlock();
 };

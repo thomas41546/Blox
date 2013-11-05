@@ -7,6 +7,8 @@
 #include <string>
 #include <iostream>
 #include <boost/foreach.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/thread/thread.hpp>
 #include <assert.h>
 #include <vector>
 #include <math.h>
@@ -28,6 +30,9 @@ private:
 
     TTF_Font* font;    
     SDL_Surface* surface;
+    boost::mutex surface_mutex;
+    
+    SDL_Surface* getSurface ();
     
 public:
     Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight);
@@ -38,11 +43,13 @@ public:
     unsigned int getWidth ();
     unsigned int getHeight ();
     
-    SDL_Surface* getSurface ();
     
     void scrollHorizonally(int amount);
     
     void scrollVertically(int amount);
+    
+    void lockSurface();
+    void unlockSurface();
     
     void setXY(unsigned int _x, unsigned int _y);
     void renderStart();
