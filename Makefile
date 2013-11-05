@@ -2,14 +2,20 @@
 #install libsdl
 
 CC=g++
-CFLAGS=-I/opt/local/include -framework Cocoa -O2 -Wall -mmacosx-version-min=10.5
-LDFLAGS=-lSDL -lSDLmain -I/opt/local/lib 
+
+INCLUDE_PATHS= -L/usr/local/Cellar/sdl_ttf/2.0.11/lib -I/usr/local/Cellar/sdl/1.2.15/include/sdl -I/usr/local/Cellar/sdl_ttf/2.0.11/include -L/usr/local/Cellar/sdl/1.2.15/lib -I/usr/local/Cellar/boost/1.54.0/include -I/usr/local/Cellar/sdl/1.2.15/include/ -I/opt/local/include 
+
+CFLAGS=-framework Cocoa -O3 -Wall -mmacosx-version-min=10.5
+LDFLAGS=-lSDL -lSDL_ttf -lSDLmain -I/opt/local/lib 
+
+CPPFILES=$(wildcard *.cpp)
+
 
 all : blox
 
-
-blox : Blox.cpp  Window.cpp Entity.cpp CellMatrix.cpp  
-	$(CC) *.cpp $(LDFLAGS) $(CFLAGS) -o blox
+blox : $(CPPFILES) 
+	echo $(CPPFILES)
+	$(CC) $(INCLUDE_PATHS) $(LDFLAGS) $(CFLAGS) $(CPPFILES) -o blox
 
 run : blox.cpp blox
 	-./blox

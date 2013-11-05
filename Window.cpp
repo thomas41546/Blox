@@ -2,6 +2,7 @@
 #include "CellMatrix.hpp"
 #include "Entity.hpp"
 #include "Window.hpp"
+#include "SDL/SDL_ttf.h"
 
 Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight){
     x = _x;
@@ -12,7 +13,13 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     maxScrollHeight = _maxScrollHeight;
     
     SDL_Init( SDL_INIT_EVERYTHING );
-    surface = SDL_SetVideoMode( width, height, 24, SDL_SWSURFACE );
+    surface = SDL_SetVideoMode( width, height, 24, SDL_HWSURFACE|SDL_DOUBLEBUF );
+    
+    assert(TTF_Init() != -1);
+    
+    font = TTF_OpenFont( "FreeMonoBold.ttf", 25 );
+    assert(font != NULL);
+
 };
 
 unsigned int Window::getX () {return x;}
@@ -56,6 +63,19 @@ void Window::renderStart(){
     SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
 };
 
+void Window::renderFont(int ox, int oy, std::string text){
+    
+    
+    SDL_Color statColor = {0,255,0,255};
+    SDL_Color blackColor = {0,0,0,255};
+    SDL_Surface* message = TTF_RenderText_Shaded(font, text.c_str(), statColor,blackColor );
+    assert(message != NULL);
+    
+    SDL_Rect offset = {ox,oy,0,0};
+    SDL_BlitSurface( message, NULL, getSurface(), &offset );
+    SDL_FreeSurface(message);
+};
+
 void Window::renderCells(CellMatrix & cells){
     
     
@@ -85,9 +105,6 @@ void Window::renderCells(CellMatrix & cells){
                 rect.h -= 2;
                 SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
             }
-            else{
-                SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
-            }
         }
     }
 };
@@ -99,5 +116,5 @@ void Window::renderEntities(std::vector<Entity *> entities){
 };
 
 void Window::renderFinish(){
-    SDL_Flip(getSurface() );
+   SDL_Flip(getSurface() );
 };

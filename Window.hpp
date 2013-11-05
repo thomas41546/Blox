@@ -3,6 +3,7 @@
 
 
 #include "SDL/SDL.h"
+#include "SDL/SDL_ttf.h"
 #include <string>
 #include <iostream>
 #include <boost/foreach.hpp>
@@ -24,7 +25,8 @@ private:
     
     unsigned int maxScrollWidth;
     unsigned int maxScrollHeight;
-    
+
+    TTF_Font* font;    
     SDL_Surface* surface;
     
 public:
@@ -44,6 +46,7 @@ public:
     
     void setXY(unsigned int _x, unsigned int _y);
     void renderStart();
+    void renderFont(int ox, int oy, std::string text);
     void renderCells(CellMatrix & cells);
     void renderEntities(std::vector<Entity *> entities);
     void renderFinish();

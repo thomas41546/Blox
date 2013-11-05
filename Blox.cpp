@@ -16,6 +16,7 @@
 #include <string>
 #include <iostream>
 #include <boost/foreach.hpp>
+#include <boost/format.hpp>
 #include <vector>
 #include <math.h>
 
@@ -47,7 +48,7 @@ int main( int argc, char* args[] ){
     // TODO abstract out to EntityManager
     static std::vector<Entity *> entities;
     
-    QuadTree * qt = new QuadTree(Point2d<float>(500,500), Point2d<float>(1000,1000), 0, 5, 100000, NULL);
+    //QuadTree * qt = new QuadTree(Point2d<float>(500,500), Point2d<float>(1000,1000), 0, 5, 100000, NULL);
     
     
     SDL_WM_SetCaption("Blox", "Blox");
@@ -74,12 +75,14 @@ int main( int argc, char* args[] ){
     
 	int is_game = 1;
     int fps = 0;
+    int lastFps = 0;
     unsigned int lastTime = SDL_GetTicks();
     
 	while(is_game){
         unsigned int curTime = SDL_GetTicks();
         if(curTime - lastTime >= 1000){
             printf("FPS/%d Entities/%ld\n",fps,entities.size());
+            lastFps = fps;
             lastTime = curTime;
             fps = 0;
         }else{
@@ -90,7 +93,9 @@ int main( int argc, char* args[] ){
 		while ( SDL_PollEvent(&event) ) {
 			switch (event.type) {
                 case SDL_KEYDOWN:
-                    if(event.key.keysym.sym == SDLK_LEFT)
+                    if(event.key.keysym.sym == SDLK_q)
+                        is_game = 0;
+                    else if(event.key.keysym.sym == SDLK_LEFT)
                         playerEntity->vx -= 0.3;
                     else if(event.key.keysym.sym == SDLK_RIGHT)
                         playerEntity->vx += 0.3;
@@ -129,35 +134,35 @@ int main( int argc, char* args[] ){
              Entity * entity =  ((Entity *)(*it));
              entity->applyAI(entities,cells);
              
-             
              if(entity->getType() != Entity::PLAYER && entity->getType() != Entity::DEFAULT &&
                 collisionDetectRIR(playerEntity->getRect(),entity->getRect())){
-                 printf("collision\n");
+                 entity->collidedWith(playerEntity);
              }
          }
         
+        
         //physics
         for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
+            Entity * entity =  ((Entity *)(*it));
             
+            entity->applyGravity(0.1);
+            entity->applyHorizontalDrag(0.9);
             
-            ((Entity *)(*it))->applyGravity(0.1);
-            ((Entity *)(*it))->applyHorizontalDrag(0.9);
+            if(entity->x < 0)entity->x = 0;
+            if(entity->y < 0)entity->y = 0;
             
-            if(((Entity *)(*it))->x < 0)((Entity *)(*it))->x = 0;
-            if(((Entity *)(*it))->y < 0)((Entity *)(*it))->y = 0;
+            if(entity->vy > MAX_VELOCITY) entity->vy = MAX_VELOCITY;
+            else if(entity->vy < -1*MAX_VELOCITY) entity->vy = -1*MAX_VELOCITY;
             
-            if(((Entity *)(*it))->vy > MAX_VELOCITY) ((Entity *)(*it))->vy = MAX_VELOCITY;
-            else if(((Entity *)(*it))->vy < -1*MAX_VELOCITY) ((Entity *)(*it))->vy = -1*MAX_VELOCITY;
-            
-            if(((Entity *)(*it))->vx > MAX_VELOCITY) ((Entity *)(*it))->vx = MAX_VELOCITY;
-            else if(((Entity *)(*it))->vx < -1*MAX_VELOCITY) ((Entity *)(*it))->vx = -1*MAX_VELOCITY;
+            if(entity->vx > MAX_VELOCITY) entity->vx = MAX_VELOCITY;
+            else if(entity->vx < -1*MAX_VELOCITY) entity->vx = -1*MAX_VELOCITY;
                 
             SDL_Rect entityRect;
              
             
-            entityRect = ((Entity *)(*it))->getRect();
-            entityRect.y += ((Entity *)(*it))->vy;
-            entityRect.x += ((Entity *)(*it))->vx;
+            entityRect = entity->getRect();
+            entityRect.y += entity->vy;
+            entityRect.x += entity->vx;
             
             bool collidedY = false;
             bool collidedX = false;
@@ -166,13 +171,13 @@ int main( int argc, char* args[] ){
                 for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
                     if( cells.getCellByPixel(i,j)!= NULL && cells.getCellByPixel(i,j)->is_frozen){
                         
-                        if(((Entity *)(*it))->getType() == Entity::BULLET){
+                        if(entity->getType() == Entity::BULLET){
                             cells.getCellByPixel(i,j)->is_frozen = 0;
-                            ((Entity *)(*it))->setDead();
+                            entity->setDead();
                             goto NEXT_ITERATION;
                         }
                         
-                        if(((Entity *)(*it))->getType() == Entity::NPC_WORM){
+                        if(entity->getType() == Entity::NPC_WORM){
                             cells.getCellByPixel(i,j)->is_frozen = 0;
                             continue;
                         }
@@ -180,30 +185,30 @@ int main( int argc, char* args[] ){
                         
                         //above
                         if(j <= (entityRect.y + entityRect.h/2)){
-                            if(((Entity *)(*it))->vy < 0){
-                                ((Entity *)(*it))->vy *= -0.1;
+                            if(entity->vy < 0){
+                                entity->vy *= -0.1;
                                 collidedY = true;
                             }
                         }
                         else{  //below
                           
-                            if(((Entity *)(*it))->vy > 0){
-                                ((Entity *)(*it))->vy  *= -0.1;
-                                ((Entity *)(*it))->hitGround = true;
+                            if(entity->vy > 0){
+                                entity->vy  *= -0.1;
+                                entity->hitGround = true;
                                 collidedY = true;
                             }
                         }
                         //left
                         if(i <= (entityRect.x + entityRect.w/2)){
-                            if(((Entity *)(*it))->vx < 0){
-                                ((Entity *)(*it))->vx  *= -0.1;
+                            if(entity->vx < 0){
+                                entity->vx  *= -0.1;
                                    collidedX = true;
                             }
                         }
                         else{  //right
                             
-                            if(((Entity *)(*it))->vx > 0){
-                                ((Entity *)(*it))->vx  *= -0.1;
+                            if(entity->vx > 0){
+                                entity->vx  *= -0.1;
                                 collidedX = true;
                             }
                         }
@@ -212,20 +217,21 @@ int main( int argc, char* args[] ){
                 }
             }
             if(!collidedY){
-                  ((Entity *)(*it))->hitGround = false;   
+                  entity->hitGround = false;   
             }
             
             if(!collidedX)
-                ((Entity *)(*it))->x += ((Entity *)(*it))->vx;
+                entity->x += entity->vx;
             
             if(!collidedY)
-                ((Entity *)(*it))->y += ((Entity *)(*it))->vy;
+                entity->y += entity->vy;
             
             NEXT_ITERATION:
             continue;
             //nothing
             
         }
+        
         
         // set window position
         //TODO make this a moving window when you get to the sides
@@ -236,12 +242,14 @@ int main( int argc, char* args[] ){
         if(ny < 0) ny = 0;
         mainWindow->setXY(nx,ny);
         
+
         mainWindow->renderStart();
 		mainWindow->renderCells(cells);
         mainWindow->renderEntities(entities);
-        
+        mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2%") % lastFps % entities.size()));
         mainWindow->renderFinish();
-		SDL_Delay( 0 );
+        
+
 	}
 	printf("You lost the game.\nNoob!\n");
     exit_Game();

@@ -38,6 +38,10 @@ bool Entity::isDead(){
     SDL_FillRect(surface, &rect, COLOR_BLACK);
 }
 
+void Entity::collidedWith(Entity * other){
+    return;
+}
+
  void Entity::applyGravity(float mag){
     vy += mag;
 }
@@ -78,6 +82,12 @@ Point2d<float> Entity::getSize(){
 extern  PlayerEntity * playerEntity;
 
 //NPCEntity
+
+void NPCEntity::collidedWith(Entity * other){
+    if(other->getType() == Entity::PLAYER){
+        //TODO finish this
+    }
+}
 
  void NPCEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
     if(abs(vy) < 0.01 &&  abs(vx) < 0.01 && hitGround){

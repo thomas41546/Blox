@@ -50,10 +50,10 @@ public:
     virtual void render(SDL_Surface* surface, int offsetX, int offsetY);
     
     virtual void applyGravity(float mag);
-    
     virtual void applyHorizontalDrag(float mag);
-    
     virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells);
+    
+    virtual void collidedWith(Entity * other);
     
 };
 
@@ -70,7 +70,7 @@ public:
     NPCEntity(SDL_Rect _dimensions) : Entity(_dimensions){}
     virtual EntityType getType();
     virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells);
-    
+    virtual void collidedWith(Entity * other);
 };
 
 class WormBodyEntity: public NPCEntity{

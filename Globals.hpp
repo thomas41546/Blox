@@ -1,6 +1,8 @@
 #ifndef __GLOBALS_H_INCLUDED__
 #define __GLOBALS_H_INCLUDED__
 
+#include <assert.h> 
+
 const int COLOR_WHITE =   0xFFFFFF;
 const int COLOR_BLACK =   0x000000;
 const int COLOR_RED =     0xFF0000;
