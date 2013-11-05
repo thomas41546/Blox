@@ -38,6 +38,20 @@ int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
     return 0;
 }
 
+std::string exec(std::string cmd) {
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) return "ERROR";
+    char buffer[128];
+    std::string result = "";
+    while(!feof(pipe)) {
+    	if(fgets(buffer, 128, pipe) != NULL)
+    		result += buffer;
+    }
+    pclose(pipe);
+    return result;
+}
+
+
 PlayerEntity * playerEntity;
 
 void exit_Game(){
@@ -260,7 +274,11 @@ int main( int argc, char* args[] ){
             mainWindow->renderStart();
             mainWindow->renderCells(cells);
             mainWindow->renderEntities(entities);
-            mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2%") % lastFps % entities.size()));
+            
+            
+            
+            std::string cpuString = exec(str(boost::format("ps -o pcpu -p %1% | grep -v CPU") % getpid()));
+            mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2% Cpu/%3%") % lastFps % entities.size() %cpuString));
             mainWindow->unlockSurface();
             
             lastRenderTime = SDL_GetTicks();

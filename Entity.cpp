@@ -93,9 +93,9 @@ void NPCEntity::collidedWith(Entity * other){
     if(abs(vy) < 0.01 &&  abs(vx) < 0.01 && hitGround){
         vy -= rand()% 6 + 1;
         if(playerEntity->x < x)
-            vx -= rand()% 5 + 3;
+            vx -= rand()% 10 ;
         else if(playerEntity->x > x)
-            vx += rand()% 5 + 3;
+            vx += rand()% 10;
     }
 }
  Entity::EntityType NPCEntity::getType(){
