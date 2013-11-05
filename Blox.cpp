@@ -240,14 +240,21 @@ int main( int argc, char* args[] ){
         ny = playerEntity->y - (int)500;
         if(nx < 0) nx = 0;
         if(ny < 0) ny = 0;
-        mainWindow->setXY(nx,ny);
         
-
-        mainWindow->renderStart();
-		mainWindow->renderCells(cells);
-        mainWindow->renderEntities(entities);
-        mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2%") % lastFps % entities.size()));
-        mainWindow->renderFinish();
+        static unsigned int lastRenderTime = 0;
+        unsigned int curRenderTime = SDL_GetTicks();
+        
+        if(curRenderTime - lastRenderTime >= 30){
+            mainWindow->setXY(nx,ny);
+            mainWindow->renderStart();
+            mainWindow->renderCells(cells);
+            mainWindow->renderEntities(entities);
+            mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2%") % lastFps % entities.size()));
+            mainWindow->renderFinish();
+            lastRenderTime = SDL_GetTicks();
+        }
+        
+        
         
 
 	}
