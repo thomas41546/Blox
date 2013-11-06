@@ -206,7 +206,6 @@ int main( int argc, char* args[] ){
             int i,j;
             
             
-            
             for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
                 for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
                     Cell * cell = cells.getCellByPixel(i,j);
