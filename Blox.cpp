@@ -270,12 +270,10 @@ int main( int argc, char* args[] ){
             
             mainWindow->setXY(nx,ny);
             
-            mainWindow->lockSurface();
             mainWindow->renderStart();
             mainWindow->renderCells(cells);
             mainWindow->renderEntities(entities);
            // mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2% Cpu/%3%") % lastFps % entities.size() % getCpuUsage() ));
-            mainWindow->unlockSurface();
             mainWindow->renderFinish();
             
             lastRenderTime = SDL_GetTicks();

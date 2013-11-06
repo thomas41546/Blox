@@ -40,13 +40,6 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     assert(error == GL_NO_ERROR);
 };
 
-void Window::lockSurface(){
-    surface_mutex.lock();
-}
-
-void Window::unlockSurface(){
-    surface_mutex.unlock();
-}
 
 unsigned int Window::getX () {return x;}
 unsigned int Window::getY () {return y;}
@@ -156,8 +149,6 @@ void Window::renderEntities(std::vector<Entity *> entities){
 };
 
 void Window::renderFinish(){
-   surface_mutex.lock();
    glFlush();
    SDL_GL_SwapBuffers();
-   surface_mutex.unlock();
 };

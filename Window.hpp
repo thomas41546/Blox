@@ -32,7 +32,6 @@ private:
 
     TTF_Font* font;    
     SDL_Surface* surface;
-    boost::mutex surface_mutex;
     
     SDL_Surface* getSurface ();
     
@@ -50,9 +49,6 @@ public:
     void scrollHorizonally(int amount);
     
     void scrollVertically(int amount);
-    
-    void lockSurface();
-    void unlockSurface();
     
     void setXY(unsigned int _x, unsigned int _y);
     void renderStart();

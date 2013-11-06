@@ -2,10 +2,10 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:Drawing.hpp">
+      location = "group:Makefile">
    </FileRef>
    <FileRef
-      location = "group:Makefile">
+      location = "group:Drawing.hpp">
    </FileRef>
    <FileRef
       location = "group:CellMatrix.hpp">
