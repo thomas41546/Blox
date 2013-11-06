@@ -5,10 +5,26 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
     height = _height;
     matrix = new Cell[width*height]();
     
+    (getCellIndex(40,55))->is_frozen = 1;
+    (getCellIndex(41,55))->is_frozen = 1;
+    (getCellIndex(42,55))->is_frozen = 1;
+    
     //map generation
     unsigned i,j;
     for(j = 0; j < height; j++){
         for(i = 0; i < width; i++){
+            
+            //(getCellIndex(i,j))->is_frozen = 1;
+            if(j > 55 && j < 57){
+                (getCellIndex(i,j))->is_frozen = 1;
+            }
+            if(i > 55 && i < 57){
+                (getCellIndex(i,j))->is_frozen = 1;
+            }
+            
+            
+            
+            
             /*
              if(rand() % 50 == 0)
              (getCellIndex(i,j))->is_frozen = 1;
@@ -23,10 +39,12 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
              }
              }*/
             
+            /*
             if(sqrt((i - 40)*(i -40)+ (j - 40)*(j - 40)) < 40)
                 (getCellIndex(i,j))->is_frozen = 0;
             else
                 (getCellIndex(i,j))->is_frozen = 1;
+            */
             
         }
     }

@@ -43,7 +43,8 @@ void Entity::collidedWith(Entity * other){
 }
 
  void Entity::applyGravity(float mag){
-    vy += mag;
+    if(!hitGround)
+        vy += mag;
 }
 
  void Entity::applyHorizontalDrag(float mag){
@@ -74,7 +75,10 @@ Point2d<float> Entity::getSize(){
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-    SDL_FillRect(surface, &rect, COLOR_RED);
+    if(hitGround)
+        SDL_FillRect(surface, &rect, COLOR_GREEN);
+    else
+        SDL_FillRect(surface, &rect, COLOR_RED);
 }
  Entity::EntityType PlayerEntity::getType(){
     return PLAYER;

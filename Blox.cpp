@@ -32,10 +32,10 @@ static std::vector<Entity *> entities;
 
 int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
 {
-    if ((box2.x>box1.x)&&((box1.x+box1.w)>box2.x))
-        if ((box2.y>box1.y)&&((box1.y+box1.h)>box2.y)) return 1;
-    
-    return 0;
+    int returnValue = 0;
+    if((box2.x>box1.x)&&((box1.x+box1.w)>box2.x))returnValue |= 1;
+    if((box2.y>box1.y)&&((box1.y+box1.h)>box2.y))returnValue |= 2;
+    return returnValue;
 }
 
 std::string exec(std::string cmd) {
@@ -87,13 +87,14 @@ int main( int argc, char* args[] ){
     playerEntity = new PlayerEntity(playerRect);
     entities.push_back((Entity *)playerEntity);
     
-    SDL_Rect wormRect = {500,500,40,40};
-    entities.push_back(new WormEntity(wormRect,entities));
+    //SDL_Rect wormRect = {500,500,40,40};
+    //entities.push_back(new WormEntity(wormRect,entities));
     
-    for(int i = 0; i < 100000; i++){
+    for(int i = 0; i < 100; i++){
         SDL_Rect npcRect = {rand()%200 + 300,rand()%200 + 300,11,11};
         entities.push_back(new NPCEntity(npcRect));
     }
+    
     
     SDL_EnableKeyRepeat(1, 5);
     
@@ -120,12 +121,18 @@ int main( int argc, char* args[] ){
                     if(event.key.keysym.sym == SDLK_q)
                         is_game = 0;
                     else if(event.key.keysym.sym == SDLK_LEFT)
-                        playerEntity->vx -= 0.3;
+                        if(playerEntity->hitGround)
+                            playerEntity->vx -= 3;
+                        else
+                            playerEntity->vx -= 0.3;
                     else if(event.key.keysym.sym == SDLK_RIGHT)
-                        playerEntity->vx += 0.3;
+                        if(playerEntity->hitGround)
+                            playerEntity->vx += 3;
+                        else
+                            playerEntity->vx += 0.3;
                     
                     else if(event.key.keysym.sym == SDLK_UP){
-                        if(abs(playerEntity->vy) < 0.01 && playerEntity->hitGround)
+                        if( playerEntity->hitGround)
                             playerEntity->vy -= 3;
                     }
                     else if(event.key.keysym.sym == SDLK_SPACE){
@@ -171,9 +178,7 @@ int main( int argc, char* args[] ){
             
             entity->applyGravity(0.1);
             entity->applyHorizontalDrag(0.9);
-            
-            if(entity->x < 0)entity->x = 0;
-            if(entity->y < 0)entity->y = 0;
+            entity->hitGround = 0;
             
             if(entity->vy > MAX_VELOCITY) entity->vy = MAX_VELOCITY;
             else if(entity->vy < -1*MAX_VELOCITY) entity->vy = -1*MAX_VELOCITY;
@@ -182,23 +187,27 @@ int main( int argc, char* args[] ){
             else if(entity->vx < -1*MAX_VELOCITY) entity->vx = -1*MAX_VELOCITY;
                 
             SDL_Rect entityRect;
-             
-            
             entityRect = entity->getRect();
             entityRect.y += entity->vy;
             entityRect.x += entity->vx;
+            if(entityRect.x < 0)entityRect.x = 0;
+            if(entityRect.y < 0)entityRect.y = 0;
             
             bool collidedY = false;
             bool collidedX = false;
             int i,j;
             for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
                 for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
-                    if( cells.getCellByPixel(i,j)!= NULL && cells.getCellByPixel(i,j)->is_frozen){
+                    Cell * cell = cells.getCellByPixel(i,j);
+                    
+                    if( cell!= NULL && cell->is_frozen){
+                        
+                        SDL_Rect cellRect = cells.getCellRectByPixel(i,j);
                         
                         if(entity->getType() == Entity::BULLET){
                             cells.getCellByPixel(i,j)->is_frozen = 0;
                             entity->setDead();
-                            goto NEXT_ITERATION;
+                            goto NEXT_ENTITY;
                         }
                         
                         if(entity->getType() == Entity::NPC_WORM){
@@ -206,51 +215,35 @@ int main( int argc, char* args[] ){
                             continue;
                         }
                         
+                        int results = collisionDetectRIR(entity->getRect(),cellRect);
                         
-                        //above
-                        if(j <= (entityRect.y + entityRect.h/2)){
-                            if(entity->vy < 0){
-                                entity->vy *= -0.1;
-                                collidedY = true;
-                            }
+                        if(results & 1 && entity->vx != 0) {
+                            //if(entity->vx > 0)
+                            //    entity->x = cellRect.x - entity->width;
+                            //if(entity->vx < 0)
+                            //    entity->x = cellRect.x + cellRect.w;
+                            entity->vx = 0;
                         }
-                        else{  //below
-                          
-                            if(entity->vy > 0){
-                                entity->vy  *= -0.1;
-                                entity->hitGround = true;
-                                collidedY = true;
-                            }
-                        }
-                        //left
-                        if(i <= (entityRect.x + entityRect.w/2)){
-                            if(entity->vx < 0){
-                                entity->vx  *= -0.1;
-                                   collidedX = true;
-                            }
-                        }
-                        else{  //right
-                            
-                            if(entity->vx > 0){
-                                entity->vx  *= -0.1;
-                                collidedX = true;
-                            }
+                        
+                        if(results & 2 && entity->vy != 0){
+                            if(entity->vy > 0)
+                                entity->y = cellRect.y - entity->height;
+                            if(entity->vy < 0)
+                                entity->y = cellRect.y + cellRect.h;
+                            entity->vy = 0;
+                            entity->hitGround = 1;
                         }
                         
                     }
                 }
             }
-            if(!collidedY){
-                  entity->hitGround = false;   
-            }
             
-            if(!collidedX)
-                entity->x += entity->vx;
+            entity->x += entity->vx;
+            entity->y += entity->vy;
+            if(entity->x < 0)entity->x = 0;
+            if(entity->y < 0)entity->y = 0;
             
-            if(!collidedY)
-                entity->y += entity->vy;
-            
-            NEXT_ITERATION:
+            NEXT_ENTITY:
             continue;
             //nothing
             
