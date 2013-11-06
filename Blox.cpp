@@ -6,6 +6,7 @@
  */
 
 #include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
 
 #include "Globals.hpp"
 #include "Entity.hpp"
@@ -81,8 +82,8 @@ int main( int argc, char* args[] ){
                             CELL_WIDTH*CellMatrix::getCellSize(),
                             CELL_HEIGHT*CellMatrix::getCellSize()); //TODO fix this
     
-    boost::thread t(boost::bind(&render_flip));
-    windowFlipThread = &t;
+    //boost::thread t(boost::bind(&render_flip));
+    //windowFlipThread = &t;
     
     SDL_Rect playerRect = {500,500,20,20};
     playerEntity = new PlayerEntity(playerRect);
@@ -265,15 +266,17 @@ int main( int argc, char* args[] ){
         static unsigned int lastRenderTime = 0;
         unsigned int curRenderTime = SDL_GetTicks();
         if(curRenderTime - lastRenderTime >= 1000/60){
+
+            
             mainWindow->setXY(nx,ny);
             
             mainWindow->lockSurface();
             mainWindow->renderStart();
             mainWindow->renderCells(cells);
             mainWindow->renderEntities(entities);
-        
-            mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2% Cpu/%3%") % lastFps % entities.size() % getCpuUsage() ));
+           // mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2% Cpu/%3%") % lastFps % entities.size() % getCpuUsage() ));
             mainWindow->unlockSurface();
+            mainWindow->renderFinish();
             
             lastRenderTime = SDL_GetTicks();
         }

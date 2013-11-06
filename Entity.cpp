@@ -1,5 +1,6 @@
 #include "Globals.hpp"
 #include "Entity.hpp"
+#include "Drawing.hpp"
 
 Entity::Entity(SDL_Rect _dimensions){
     x = (double)_dimensions.x;
@@ -35,7 +36,7 @@ bool Entity::isDead(){
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-    SDL_FillRect(surface, &rect, COLOR_BLACK);
+    Drawing::drawRect(rect,COLOR_BLACK);
 }
 
 void Entity::collidedWith(Entity * other){
@@ -76,9 +77,9 @@ Point2d<float> Entity::getSize(){
     rect.x -= offsetX;
     rect.y -= offsetY;
     if(hitGround)
-        SDL_FillRect(surface, &rect, COLOR_GREEN);
+        Drawing::drawRect(rect,COLOR_GREEN);
     else
-        SDL_FillRect(surface, &rect, COLOR_RED);
+        Drawing::drawRect(rect,COLOR_RED);
 }
  Entity::EntityType PlayerEntity::getType(){
     return PLAYER;
@@ -120,7 +121,7 @@ void NPCEntity::collidedWith(Entity * other){
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-    SDL_FillRect(surface, &rect, COLOR_BLUE);
+     Drawing::drawRect(rect,COLOR_BLUE);
 }
 
  Entity::EntityType WormBodyEntity::getType(){
@@ -171,7 +172,7 @@ WormEntity::WormEntity(SDL_Rect _dimensions, std::vector<Entity *> & entities) :
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-    SDL_FillRect(surface, &rect, COLOR_BLUE);
+     Drawing::drawRect(rect,COLOR_BLUE);
 }
 
  Entity::EntityType WormEntity::getType(){
@@ -187,7 +188,7 @@ BulletEntity::BulletEntity(SDL_Rect _dimensions) : Entity(_dimensions){
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-    SDL_FillRect(surface, &rect, COLOR_GREEN);
+     Drawing::drawRect(rect,COLOR_GREEN);
 }
 
  void BulletEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){

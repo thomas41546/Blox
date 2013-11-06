@@ -2,7 +2,9 @@
 #include "CellMatrix.hpp"
 #include "Entity.hpp"
 #include "Window.hpp"
+#include "Drawing.hpp"
 #include "SDL/SDL_ttf.h"
+#include "SDL/SDL_opengl.h"
 
 Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight){
     x = _x;
@@ -14,12 +16,28 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     
     SDL_Init( SDL_INIT_EVERYTHING );
     
-    surface = SDL_SetVideoMode( width, height, 24, SDL_HWSURFACE|SDL_DOUBLEBUF );
-    
+    surface = SDL_SetVideoMode( width, height, 24, SDL_HWSURFACE|SDL_DOUBLEBUF| SDL_OPENGL  );
+
     assert(TTF_Init() != -1);
-    
     font = TTF_OpenFont( "FreeMonoBold.ttf", 25 );
     assert(font != NULL);
+    
+    //Initialize Projection Matrix
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+    glOrtho(0.f, width, height, 0.f, 1.f, 1000.f);
+    
+    //Initialize Modelview Matrix
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+    glTranslatef(0.f, 0.f, -500.f);
+    
+    //Initialize clear color
+    glClearColor( 1.f, 1.f, 1.f, 1.f );
+    
+    //Check for error
+    GLenum error = glGetError();
+    assert(error == GL_NO_ERROR);
 };
 
 void Window::lockSurface(){
@@ -67,9 +85,10 @@ void Window::setXY(unsigned int _x, unsigned int _y){
 
 void Window::renderStart(){
     //blank
-    SDL_Rect rect = {0,0,getWidth(), getHeight()};
+    //SDL_Rect rect = {0,0,getWidth(), getHeight()};
+    //SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
     
-    SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
+    glClear( GL_COLOR_BUFFER_BIT );
 };
 
 void Window::renderFont(int ox, int oy, std::string text){
@@ -109,20 +128,20 @@ void Window::renderCells(CellMatrix & cells){
                 cellSize};
             
             if( cells.getCellByPixel(i,j) != NULL && cells.getCellByPixel(i,j)->is_slope){
-                SDL_FillRect(getSurface(), &rect, COLOR_BLUE);
+                Drawing::drawRect(rect,COLOR_BLUE);
                 continue;
             }
             
             if(cells.getCellByPixel(i,j) != NULL && (cells.getCellByPixel(i,j))->is_frozen){
-                SDL_FillRect(getSurface(), &rect, COLOR_BLACK);
+                Drawing::drawRect(rect,COLOR_BLACK);
                 rect.x += 1;
                 rect.y += 1;
                 rect.w -= 2;
                 rect.h -= 2;
                 if(cells.getCellByPixel(i,j)->is_hit > 0){
-                    SDL_FillRect(getSurface(), &rect, COLOR_GREEN);
+                    Drawing::drawRect(rect,COLOR_GREEN);
                 }else{
-                    SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
+                    Drawing::drawRect(rect,COLOR_WHITE);
                 }
                 
             }
@@ -138,6 +157,7 @@ void Window::renderEntities(std::vector<Entity *> entities){
 
 void Window::renderFinish(){
    surface_mutex.lock();
-   SDL_Flip(getSurface() );
+   glFlush();
+   SDL_GL_SwapBuffers();
    surface_mutex.unlock();
 };

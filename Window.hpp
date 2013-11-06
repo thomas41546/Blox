@@ -4,6 +4,8 @@
 
 #include "SDL/SDL.h"
 #include "SDL/SDL_ttf.h"
+#include "SDL/SDL_opengl.h"
+
 #include <string>
 #include <iostream>
 #include <boost/foreach.hpp>
@@ -33,6 +35,7 @@ private:
     boost::mutex surface_mutex;
     
     SDL_Surface* getSurface ();
+    
     
 public:
     Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight);
