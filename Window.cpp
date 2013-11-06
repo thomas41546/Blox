@@ -108,13 +108,22 @@ void Window::renderCells(CellMatrix & cells){
                 cellSize,
                 cellSize};
             
+            if( cells.getCellByPixel(i,j) != NULL && cells.getCellByPixel(i,j)->is_slope){
+                SDL_FillRect(getSurface(), &rect, COLOR_BLUE);
+                continue;
+            }
+            
             if(cells.getCellByPixel(i,j) != NULL && (cells.getCellByPixel(i,j))->is_frozen){
                 SDL_FillRect(getSurface(), &rect, COLOR_BLACK);
                 rect.x += 1;
                 rect.y += 1;
                 rect.w -= 2;
                 rect.h -= 2;
-                SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
+                if(cells.getCellByPixel(i,j)->is_hit > 0){
+                    SDL_FillRect(getSurface(), &rect, COLOR_GREEN);
+                }else{
+                    SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
+                }
                 
             }
         }

@@ -5,7 +5,7 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
     height = _height;
     matrix = new Cell[width*height]();
     
-    (getCellIndex(40,55))->is_frozen = 1;
+    (getCellIndex(1,55))->is_frozen = 1;
     (getCellIndex(41,55))->is_frozen = 1;
     (getCellIndex(42,55))->is_frozen = 1;
     
@@ -20,12 +20,9 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
             }
             if(i > 55 && i < 57){
                 (getCellIndex(i,j))->is_frozen = 1;
-            }
+            }            
             
             
-            
-            
-            /*
              if(rand() % 50 == 0)
              (getCellIndex(i,j))->is_frozen = 1;
              else{
@@ -37,7 +34,7 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
              if(getCellIndex(i-1,j-1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
              if(getCellIndex(i+1,j+1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
              }
-             }*/
+             }
             
             /*
             if(sqrt((i - 40)*(i -40)+ (j - 40)*(j - 40)) < 40)
@@ -48,6 +45,36 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
             
         }
     }
+    
+    
+    // adds slopes
+    for(j = 1; j < height - 1; j++){
+        for(i = 1; i < width - 1; i++){
+            
+            if(!(getCellIndex(i,j))->is_frozen){
+                if((getCellIndex(i,j+1))->is_frozen &&
+                   (getCellIndex(i-1,j))->is_frozen &&
+                   !(getCellIndex(i+1,j-1))->is_frozen &&
+                   !(getCellIndex(i+1,j))->is_frozen &&
+                   !(getCellIndex(i,j-1))->is_frozen){
+                    
+                    (getCellIndex(i,j))->is_slope = 1;
+                }
+                else if((getCellIndex(i+1,j))->is_frozen &&
+                   (getCellIndex(i,j+1))->is_frozen &&
+                   !(getCellIndex(i-1,j))->is_frozen &&
+                   !(getCellIndex(i-1,j-1))->is_frozen &&
+                   !(getCellIndex(i,j-1))->is_frozen){
+                    
+                    (getCellIndex(i,j))->is_slope = 2;
+                }
+                
+            }
+            
+        }
+    }
+    
+    
     
     
 }

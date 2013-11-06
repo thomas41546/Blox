@@ -38,9 +38,10 @@ int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
     return returnValue;
 }
 
-std::string exec(std::string cmd) {
+int getCpuUsage() {
+    std::string cmd = str(boost::format("ps -o pcpu -p %1% | grep -v CPU") % getpid());
     FILE* pipe = popen(cmd.c_str(), "r");
-    if (!pipe) return "ERROR";
+    if (!pipe) return 0;
     char buffer[128];
     std::string result = "";
     while(!feof(pipe)) {
@@ -48,7 +49,7 @@ std::string exec(std::string cmd) {
     		result += buffer;
     }
     pclose(pipe);
-    return result;
+    return atoi(result.c_str());
 }
 
 
@@ -89,11 +90,11 @@ int main( int argc, char* args[] ){
     
     //SDL_Rect wormRect = {500,500,40,40};
     //entities.push_back(new WormEntity(wormRect,entities));
-    
+    /*
     for(int i = 0; i < 100; i++){
         SDL_Rect npcRect = {rand()%200 + 300,rand()%200 + 300,11,11};
         entities.push_back(new NPCEntity(npcRect));
-    }
+    }*/
     
     
     SDL_EnableKeyRepeat(1, 5);
@@ -121,14 +122,8 @@ int main( int argc, char* args[] ){
                     if(event.key.keysym.sym == SDLK_q)
                         is_game = 0;
                     else if(event.key.keysym.sym == SDLK_LEFT)
-                        if(playerEntity->hitGround)
-                            playerEntity->vx -= 3;
-                        else
                             playerEntity->vx -= 0.3;
                     else if(event.key.keysym.sym == SDLK_RIGHT)
-                        if(playerEntity->hitGround)
-                            playerEntity->vx += 3;
-                        else
                             playerEntity->vx += 0.3;
                     
                     else if(event.key.keysym.sym == SDLK_UP){
@@ -172,6 +167,19 @@ int main( int argc, char* args[] ){
          }
         
         
+        //DEBUG TODO remove
+        
+        for(int j = 0; j <= 2000 ; j+= CellMatrix::getCellSize()){
+            for(int i = 0; i <=  2000; i+=CellMatrix::getCellSize()){
+                Cell * cell = cells.getCellByPixel(i,j);
+                if( cell!= NULL){
+                    cell->is_hit -= 1;
+                    if(cell->is_hit  < 0) cell->is_hit  =0;
+                }
+            }
+        }
+        
+        
         //physics
         for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
             Entity * entity =  ((Entity *)(*it));
@@ -196,52 +204,49 @@ int main( int argc, char* args[] ){
             bool collidedY = false;
             bool collidedX = false;
             int i,j;
+            
+            
+            
             for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
                 for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
                     Cell * cell = cells.getCellByPixel(i,j);
-                    
                     if( cell!= NULL && cell->is_frozen){
-                        
-                        SDL_Rect cellRect = cells.getCellRectByPixel(i,j);
+                        cell->is_hit = 100;;
                         
                         if(entity->getType() == Entity::BULLET){
                             cells.getCellByPixel(i,j)->is_frozen = 0;
+                            //TODO: re-detect slopes perhaps add function to cells to recalculate surrounding cell slope values.
                             entity->setDead();
                             goto NEXT_ENTITY;
                         }
                         
                         if(entity->getType() == Entity::NPC_WORM){
                             cells.getCellByPixel(i,j)->is_frozen = 0;
+                            //TODO: re-detect slopes
                             continue;
                         }
                         
-                        int results = collisionDetectRIR(entity->getRect(),cellRect);
-                        
-                        if(results & 1 && entity->vx != 0) {
-                            //if(entity->vx > 0)
-                            //    entity->x = cellRect.x - entity->width;
-                            //if(entity->vx < 0)
-                            //    entity->x = cellRect.x + cellRect.w;
-                            entity->vx = 0;
-                        }
-                        
-                        if(results & 2 && entity->vy != 0){
-                            if(entity->vy > 0)
-                                entity->y = cellRect.y - entity->height;
-                            if(entity->vy < 0)
-                                entity->y = cellRect.y + cellRect.h;
-                            entity->vy = 0;
-                            entity->hitGround = 1;
-                        }
+                        entity->vx = 0;
+                        entity->vy = 0;
+                        collidedY = 1;
+                        collidedX = 1;
                         
                     }
                 }
             }
             
-            entity->x += entity->vx;
-            entity->y += entity->vy;
-            if(entity->x < 0)entity->x = 0;
-            if(entity->y < 0)entity->y = 0;
+            if(!collidedY){
+                entity->y += entity->vy;
+                if(entity->y < 0)entity->y = 0;
+            }
+            
+            if(!collidedX){
+                entity->x += entity->vx;
+                if(entity->x < 0)entity->x = 0;
+            }
+            
+            //if(abs(entity->vy) < 0.01) entity->vy = 0;
+            //if(abs(entity->vx) < 0.01) entity->vx = 0;
             
             NEXT_ENTITY:
             continue;
@@ -267,11 +272,8 @@ int main( int argc, char* args[] ){
             mainWindow->renderStart();
             mainWindow->renderCells(cells);
             mainWindow->renderEntities(entities);
-            
-            
-            
-            std::string cpuString = exec(str(boost::format("ps -o pcpu -p %1% | grep -v CPU") % getpid()));
-            mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2% Cpu/%3%") % lastFps % entities.size() %cpuString));
+        
+            mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2% Cpu/%3%") % lastFps % entities.size() % getCpuUsage() ));
             mainWindow->unlockSurface();
             
             lastRenderTime = SDL_GetTicks();

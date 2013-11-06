@@ -14,7 +14,8 @@
 class Cell{
 public:
     unsigned int is_frozen;
-    unsigned int is_herd;
+    unsigned int is_slope;
+    int is_hit;
 };
 
 class CellMatrix {
