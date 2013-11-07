@@ -3,6 +3,7 @@
 #include "Entity.hpp"
 #include "Window.hpp"
 #include "Drawing.hpp"
+#include "ShaderLoader.hpp"
 #include "SDL/SDL_ttf.h"
 #include "SDL/SDL_opengl.h"
 
@@ -34,6 +35,21 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     
     //Initialize clear color
     glClearColor( 1.f, 1.f, 1.f, 1.f );
+    
+
+    const GLchar *vertex_shader[] ={
+        "void main(void) {\n",
+        "    gl_Position = ftransform();\n",
+        "    gl_FrontColor = gl_Color;\n",
+        "}"};
+    
+    const GLchar *color_shader[] = {
+        "void main() {\n",
+        "   gl_FragColor = gl_Color;\n",
+        "}"
+    };
+    static ShaderLoader prog(vertex_shader, color_shader);
+    prog();
     
     //Check for error
     GLenum error = glGetError();
