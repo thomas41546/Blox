@@ -33,6 +33,8 @@ private:
     TTF_Font* font;    
     SDL_Surface* surface;
     
+    GLuint blockTexture;
+    
     SDL_Surface* getSurface ();
     
     

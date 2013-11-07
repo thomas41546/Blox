@@ -51,9 +51,18 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     static ShaderLoader prog(vertex_shader, color_shader);
     prog();
     
+    int width_temp, height_temp;
+    blockTexture = Drawing::png_texture_load("checkers.png",&width_temp,&height_temp);
+    printf("Loaded plaster width/%d height/%d\n",width_temp,height_temp);
+    
     //Check for error
     GLenum error = glGetError();
     assert(error == GL_NO_ERROR);
+    
+    
+    
+    
+    
 };
 
 
@@ -98,6 +107,10 @@ void Window::renderStart(){
     //SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
     
     glClear( GL_COLOR_BUFFER_BIT );
+    glEnable( GL_TEXTURE_2D );
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,GL_MODULATE);//GL_MODULATE
+    glBindTexture( GL_TEXTURE_2D, blockTexture );
+    glBegin( GL_QUADS );
 };
 
 void Window::renderFont(int ox, int oy, std::string text){
@@ -165,6 +178,8 @@ void Window::renderEntities(std::vector<Entity *> entities){
 };
 
 void Window::renderFinish(){
+   glEnd();
    glFlush();
+   glDisable(GL_TEXTURE_2D);
    SDL_GL_SwapBuffers();
 };
