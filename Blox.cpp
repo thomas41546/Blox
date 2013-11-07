@@ -89,13 +89,13 @@ int main( int argc, char* args[] ){
     playerEntity = new PlayerEntity(playerRect);
     entities.push_back((Entity *)playerEntity);
     
-    //SDL_Rect wormRect = {500,500,40,40};
-    //entities.push_back(new WormEntity(wormRect,entities));
-    /*
-    for(int i = 0; i < 100; i++){
+    SDL_Rect wormRect = {500,500,40,40};
+    entities.push_back(new WormEntity(wormRect,entities));
+    
+    for(int i = 0; i < 1000; i++){
         SDL_Rect npcRect = {rand()%200 + 300,rand()%200 + 300,11,11};
         entities.push_back(new NPCEntity(npcRect));
-    }*/
+    }
     
     
     SDL_EnableKeyRepeat(1, 5);
@@ -263,24 +263,24 @@ int main( int argc, char* args[] ){
         if(nx < 0) nx = 0;
         if(ny < 0) ny = 0;
         
+        mainWindow->setXY(nx,ny);
+        
+        mainWindow->renderStart();
+        mainWindow->renderCells(cells);
+        mainWindow->renderEntities(entities);
+       // mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2% Cpu/%3%") % lastFps % entities.size() % getCpuUsage() ));
+        mainWindow->renderFinish();
+        
         static unsigned int lastRenderTime = 0;
-        unsigned int curRenderTime = SDL_GetTicks();
-        if(curRenderTime - lastRenderTime >= 1000/60){
-
-            
-            mainWindow->setXY(nx,ny);
-            
-            mainWindow->renderStart();
-            mainWindow->renderCells(cells);
-            mainWindow->renderEntities(entities);
-           // mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2% Cpu/%3%") % lastFps % entities.size() % getCpuUsage() ));
-            mainWindow->renderFinish();
-            
-            lastRenderTime = SDL_GetTicks();
+        static unsigned int curRenderTime = 0;
+        
+        curRenderTime = SDL_GetTicks();
+        
+        if(curRenderTime - lastRenderTime > 0 && curRenderTime - lastRenderTime  < 1000/60){
+            usleep((1000/60 - (curRenderTime - lastRenderTime)));
         }
-        else{
-            usleep((1000/60 - (curRenderTime - lastRenderTime))*1000);//todo improve this, caps it 50-60 try to make it consitent, corporate mainWIndow draws
-        }
+        
+        lastRenderTime = SDL_GetTicks();
 
 	}
     exit_Game();

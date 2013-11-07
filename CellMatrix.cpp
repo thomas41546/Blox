@@ -14,7 +14,8 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
     for(j = 0; j < height; j++){
         for(i = 0; i < width; i++){
             
-            //(getCellIndex(i,j))->is_frozen = 1;
+            (getCellIndex(i,j))->is_frozen = 1; //ALL
+            
             if(j > 55 && j < 57){
                 (getCellIndex(i,j))->is_frozen = 1;
             }

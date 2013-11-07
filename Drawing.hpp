@@ -15,6 +15,7 @@ class Drawing {
 
 public:
     static void drawRect(SDL_Rect & rect, SDL_Color color){
+        
         glBegin( GL_QUADS );
         glColor3f(color.r/255.0f,color.g/255.0f,color.b/255.0f);
         glVertex2f(rect.x, rect.y);
