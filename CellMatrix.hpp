@@ -33,6 +33,8 @@ public:
     unsigned int getWidth ();
     unsigned int getHeight ();
     
+    void calcSlopes(int i, int j);
+    
     Cell * getCellIndex(unsigned int x, unsigned int y);
     Cell * getCellByPixel(unsigned int x, unsigned int y);
     SDL_Rect getCellRectByPixel(unsigned int x, unsigned int y);

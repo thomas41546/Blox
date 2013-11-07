@@ -43,4 +43,7 @@
    <FileRef
       location = "group:Blox.cpp">
    </FileRef>
+   <FileRef
+      location = "group:tex.c">
+   </FileRef>
 </Workspace>

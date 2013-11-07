@@ -54,6 +54,7 @@ int getCpuUsage() {
 }
 
 
+
 PlayerEntity * playerEntity;
 
 void exit_Game(){
@@ -177,8 +178,10 @@ int main( int argc, char* args[] ){
                     cell->is_hit -= 1;
                     if(cell->is_hit  < 0) cell->is_hit  =0;
                 }
+                
             }
         }
+        
         
         
         //physics
@@ -215,14 +218,20 @@ int main( int argc, char* args[] ){
                         
                         if(entity->getType() == Entity::BULLET){
                             cells.getCellByPixel(i,j)->is_frozen = 0;
-                            //TODO: re-detect slopes perhaps add function to cells to recalculate surrounding cell slope values.
+                            for(int ix = -1; ix <= 1; ix++)
+                                for(int iy = -1; iy <= 1; iy++)
+                                    cells.calcSlopes(i/CellMatrix::getCellSize() + ix,
+                                                     j/CellMatrix::getCellSize() + iy);
                             entity->setDead();
                             goto NEXT_ENTITY;
                         }
                         
                         if(entity->getType() == Entity::NPC_WORM){
                             cells.getCellByPixel(i,j)->is_frozen = 0;
-                            //TODO: re-detect slopes
+                            for(int ix = -1; ix <= 1; ix++)
+                                for(int iy = -1; iy <= 1; iy++)
+                                    cells.calcSlopes(i/CellMatrix::getCellSize() + ix,
+                                                     j/CellMatrix::getCellSize() + iy);
                             continue;
                         }
                         

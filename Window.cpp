@@ -23,7 +23,6 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     font = TTF_OpenFont( "FreeMonoBold.ttf", 25 );
     assert(font != NULL);
     
-    //Initialize Projection Matrix
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     glOrtho(0.f, width, height, 0.f, 1.f, 1000.f);
@@ -33,12 +32,16 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     glLoadIdentity();
     glTranslatef(0.f, 0.f, -500.f);
     
-    //Initialize clear color
     glClearColor( 1.f, 1.f, 1.f, 1.f );
     
-
+    
+    
+    blockTexture = Drawing::loadTexture("dirty1.png");
+    
     const GLchar *vertex_shader[] ={
         "void main(void) {\n",
+        "    gl_TexCoord[0] =  gl_MultiTexCoord0;\n",
+        "    gl_TexCoord[1] =  gl_MultiTexCoord1;\n",
         "    gl_Position = ftransform();\n",
         "    gl_FrontColor = gl_Color;\n",
         "}"};
@@ -50,16 +53,10 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     };
     static ShaderLoader prog(vertex_shader, color_shader);
     prog();
-    
-    blockTexture = Drawing::loadTexture("checkers.png");
-    
     //Check for error
     GLenum error = glGetError();
     assert(error == GL_NO_ERROR);
-    
-    
-    
-    
+
     
 };
 
@@ -147,23 +144,41 @@ void Window::renderCells(CellMatrix & cells){
                 cellSize,
                 cellSize};
             
-            if( cells.getCellByPixel(i,j) != NULL && cells.getCellByPixel(i,j)->is_slope){
-                Drawing::drawRect(rect,COLOR_BLUE);
-                continue;
-            }
-            
-            if(cells.getCellByPixel(i,j) != NULL && (cells.getCellByPixel(i,j))->is_frozen){
-                Drawing::drawRect(rect,COLOR_BLACK);
-                rect.x += 1;
-                rect.y += 1;
-                rect.w -= 2;
-                rect.h -= 2;
-                if(cells.getCellByPixel(i,j)->is_hit > 0){
-                    Drawing::drawRect(rect,COLOR_GREEN);
-                }else{
-                    Drawing::drawRect(rect,COLOR_WHITE);
-                }
+            if(cells.getCellByPixel(i,j) != NULL){
                 
+                if((cells.getCellByPixel(i,j))->is_frozen){
+                    Drawing::drawRect(rect,COLOR_BLACK);
+                    rect.x += 1;
+                    rect.y += 1;
+                    rect.w -= 2;
+                    rect.h -= 2;
+                    if(cells.getCellByPixel(i,j)->is_hit > 0){
+                        Drawing::drawRect(rect,COLOR_GREEN);
+                    }else{
+                        Drawing::drawRect(rect,COLOR_WHITE);
+                    }
+                    
+                }
+                else{
+                    if( cells.getCellByPixel(i,j)->is_slope == 1){
+                        Drawing::drawRightTriangleLeft(rect,COLOR_BLACK);
+                        rect.x -= 0;
+                        rect.y += 2;
+                        rect.w -= 2;
+                        rect.h -= 2;
+                        Drawing::drawRightTriangleLeft(rect,COLOR_WHITE);
+                        continue;
+                    }
+                    else if( cells.getCellByPixel(i,j)->is_slope == 2){
+                        Drawing::drawRightTriangleRight(rect,COLOR_BLACK);
+                        rect.x += 2;
+                        rect.y += 2;
+                        rect.w -= 2;
+                        rect.h -= 2;
+                        Drawing::drawRightTriangleRight(rect,COLOR_WHITE);
+                        continue;
+                    }
+                }
             }
         }
     }

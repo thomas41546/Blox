@@ -14,7 +14,7 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
     for(j = 0; j < height; j++){
         for(i = 0; i < width; i++){
             
-            (getCellIndex(i,j))->is_frozen = 1; //ALL
+            //(getCellIndex(i,j))->is_frozen = 1; //ALL
             
             if(j > 55 && j < 57){
                 (getCellIndex(i,j))->is_frozen = 1;
@@ -47,37 +47,36 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
         }
     }
     
-    
-    // adds slopes
     for(j = 1; j < height - 1; j++){
         for(i = 1; i < width - 1; i++){
-            
-            if(!(getCellIndex(i,j))->is_frozen){
-                if((getCellIndex(i,j+1))->is_frozen &&
-                   (getCellIndex(i-1,j))->is_frozen &&
-                   !(getCellIndex(i+1,j-1))->is_frozen &&
-                   !(getCellIndex(i+1,j))->is_frozen &&
-                   !(getCellIndex(i,j-1))->is_frozen){
-                    
-                    (getCellIndex(i,j))->is_slope = 1;
-                }
-                else if((getCellIndex(i+1,j))->is_frozen &&
-                   (getCellIndex(i,j+1))->is_frozen &&
-                   !(getCellIndex(i-1,j))->is_frozen &&
-                   !(getCellIndex(i-1,j-1))->is_frozen &&
-                   !(getCellIndex(i,j-1))->is_frozen){
-                    
-                    (getCellIndex(i,j))->is_slope = 2;
-                }
-                
-            }
-            
+            calcSlopes(i,j);
         }
     }
     
+}
+
+void CellMatrix::calcSlopes(int i, int j){
+    if(i <= 1 || i >= width -1)return;
+    if(j <= 1 || j >= height -1)return;
     
-    
-    
+    (getCellIndex(i,j))->is_slope = 0;
+    if(!(getCellIndex(i,j))->is_frozen){
+        if((getCellIndex(i,j+1))->is_frozen &&
+           (getCellIndex(i-1,j))->is_frozen &&
+           !(getCellIndex(i+1,j-1))->is_frozen &&
+           !(getCellIndex(i+1,j))->is_frozen &&
+           !(getCellIndex(i,j-1))->is_frozen){
+            (getCellIndex(i,j))->is_slope = 1;
+        }
+        else if((getCellIndex(i+1,j))->is_frozen &&
+                (getCellIndex(i,j+1))->is_frozen &&
+                !(getCellIndex(i-1,j))->is_frozen &&
+                !(getCellIndex(i-1,j-1))->is_frozen &&
+                !(getCellIndex(i,j-1))->is_frozen){
+            
+            (getCellIndex(i,j))->is_slope = 2;
+        }
+    }
 }
 
 unsigned int CellMatrix::getWidth () {return width;}
@@ -92,7 +91,6 @@ Cell * CellMatrix::getCellIndex(unsigned int x, unsigned int y){
         return NULL;
     }
 }
-
 
 Cell * CellMatrix::getCellByPixel(unsigned int x, unsigned int y){
     x /= CellMatrix::getCellSize();

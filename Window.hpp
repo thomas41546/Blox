@@ -39,6 +39,8 @@ private:
     
     
 public:
+    
+    
     Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight);
     
     unsigned int getX();
