@@ -19,7 +19,7 @@ INCLUDE_PATHS= \
 -I/opt/local/lib
 
 CFLAGS=-framework Cocoa -framework OpenGL -O3 -Wall -mmacosx-version-min=10.5
-LDFLAGS=-lpng -lboost_system-mt -lboost_thread-mt -lSDL -lSDL_ttf -lSDLmain
+LDFLAGS=-lSDL_image -lboost_system-mt -lboost_thread-mt -lSDL -lSDL_ttf -lSDLmain
 
 CPPFILES=$(wildcard *.cpp)
 HPPFILES=$(wildcard *.hpp)

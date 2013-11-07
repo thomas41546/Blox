@@ -271,6 +271,9 @@ int main( int argc, char* args[] ){
        // mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2% Cpu/%3%") % lastFps % entities.size() % getCpuUsage() ));
         mainWindow->renderFinish();
         
+ 
+        
+        
         static unsigned int lastRenderTime = 0;
         static unsigned int curRenderTime = 0;
         

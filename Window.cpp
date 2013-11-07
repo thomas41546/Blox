@@ -51,9 +51,7 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     static ShaderLoader prog(vertex_shader, color_shader);
     prog();
     
-    int width_temp, height_temp;
-    blockTexture = Drawing::png_texture_load("checkers.png",&width_temp,&height_temp);
-    printf("Loaded plaster width/%d height/%d\n",width_temp,height_temp);
+    blockTexture = Drawing::loadTexture("checkers.png");
     
     //Check for error
     GLenum error = glGetError();
