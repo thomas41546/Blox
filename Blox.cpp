@@ -211,7 +211,6 @@ int main( int argc, char* args[] ){
             bool collidedX = false;
             int i,j;
             
-            
             for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
                 for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
                     Cell * cell = cells.getCellByPixel(i,j);
@@ -237,6 +236,35 @@ int main( int argc, char* args[] ){
                             continue;
                         }
                         
+                        //above
+                        if(j <= (entityRect.y + entityRect.h/2)){
+                            if(entity->vy < 0){
+                                entity->vy *= -0.1;
+                                collidedY = true;
+                            }
+                        }
+                        else{  //below
+                            
+                            if(entity->vy > 0){
+                                entity->vy  *= -0.1;
+                                entity->hitGround = true;
+                                collidedY = true;
+                            }
+                        }
+                        //left
+                        if(i <= (entityRect.x + entityRect.w/2)){
+                            if(entity->vx < 0){
+                                entity->vx  *= -0.1;
+                                collidedX = true;
+                            }
+                        }
+                        else{  //right
+                            
+                            if(entity->vx > 0){
+                                entity->vx  *= -0.1;
+                                collidedX = true;
+                            }
+                        }
                         entity->vx = 0;
                         entity->vy = 0;
                         collidedY = 1;
@@ -247,14 +275,14 @@ int main( int argc, char* args[] ){
             }
             
             if(!collidedY){
-                entity->y += entity->vy;
-                if(entity->y < 0)entity->y = 0;
+                entity->hitGround = false;
             }
             
-            if(!collidedX){
+            if(!collidedX)
                 entity->x += entity->vx;
-                if(entity->x < 0)entity->x = 0;
-            }
+            
+            if(!collidedY)
+                entity->y += entity->vy;
             
             //if(abs(entity->vy) < 0.01) entity->vy = 0;
             //if(abs(entity->vx) < 0.01) entity->vx = 0;
