@@ -202,8 +202,10 @@ int main( int argc, char* args[] ){
             entityRect = entity->getRect();
             entityRect.y += entity->vy;
             entityRect.x += entity->vx;
-            if(entityRect.x < 0)entityRect.x = 0;
-            if(entityRect.y < 0)entityRect.y = 0;
+            if(entityRect.x < 0 || entityRect.y < 0){
+                entity->setDead();
+                continue;
+            }
             
             bool collidedY = false;
             bool collidedX = false;

@@ -34,29 +34,30 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     
     glClearColor( 1.f, 1.f, 1.f, 1.f );
     
-    
-    
     blockTexture = Drawing::loadTexture("dirty1.png");
     
     const GLchar *vertex_shader[] ={
         "void main(void) {\n",
-        "    gl_TexCoord[0] =  gl_MultiTexCoord0;\n",
-        "    gl_TexCoord[1] =  gl_MultiTexCoord1;\n",
         "    gl_Position = ftransform();\n",
-        "    gl_FrontColor = gl_Color;\n",
+        "gl_FrontColor = gl_Color;\n",
+        "    gl_TexCoord[0] =  gl_MultiTexCoord0;\n",
+        "   gl_TexCoord[1] = gl_MultiTexCoord1;\n",
         "}"};
     
-    const GLchar *color_shader[] = {
+    const GLchar *fragment_shader[] = {
+        "uniform sampler2D myTexture1;",
         "void main() {\n",
-        "   gl_FragColor = gl_Color;\n",
+        "      vec4 texval1 = texture2D(myTexture1, vec2(gl_TexCoord[0]));",
+        "       gl_FragColor = normalize(texval1 + gl_Color);",
         "}"
     };
-    static ShaderLoader prog(vertex_shader, color_shader);
-    prog();
+    static ShaderLoader prog(vertex_shader, fragment_shader);
+    //prog();
+    //TODO fix fragment_shader
+    
     //Check for error
     GLenum error = glGetError();
     assert(error == GL_NO_ERROR);
-
     
 };
 

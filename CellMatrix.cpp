@@ -56,8 +56,8 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
 }
 
 void CellMatrix::calcSlopes(int i, int j){
-    if(i <= 1 || i >= width -1)return;
-    if(j <= 1 || j >= height -1)return;
+    if(i <= 1 || i >= (int)width -1)return;
+    if(j <= 1 || j >= (int)height -1)return;
     
     (getCellIndex(i,j))->is_slope = 0;
     if(!(getCellIndex(i,j))->is_frozen){
