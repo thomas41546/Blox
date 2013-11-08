@@ -193,18 +193,29 @@ BulletEntity::BulletEntity(SDL_Rect _dimensions) : Entity(_dimensions){
 
  void BulletEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
     lifetime -= 1;
-    if(lifetime == 0){
-        setDead();
-    }
+    if(lifetime == 0){setDead();}
 }
 
 
- void BulletEntity::applyGravity(float mag){
+ void BulletEntity::applyGravity(float mag){}
+
+ void BulletEntity::applyHorizontalDrag(float mag){}
+
+ Entity::EntityType BulletEntity::getType(){return BULLET;}
+
+
+//LightEntity
+LightEntity::LightEntity(SDL_Rect _dimensions) : Entity(_dimensions){
+    lifetime = LIGHT_LIFE; //x * fps
 }
 
- void BulletEntity::applyHorizontalDrag(float mag){
-}
+void LightEntity::render(SDL_Surface* surface, int offsetX, int offsetY){}
 
- Entity::EntityType BulletEntity::getType(){
-    return BULLET;
+void LightEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
+    // out of screen
+    lifetime -= 1;
+    if(lifetime == 0){setDead();}
 }
+void LightEntity::applyGravity(float mag){}
+void LightEntity::applyHorizontalDrag(float mag){}
+Entity::EntityType LightEntity::getType(){return LIGHT;}

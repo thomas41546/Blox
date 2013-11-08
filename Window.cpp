@@ -39,9 +39,9 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     const GLchar *vertex_shader[] ={
         "void main(void) {\n",
         "    gl_Position = ftransform();\n",
-        "gl_FrontColor = gl_Color;\n",
+            "gl_FrontColor = gl_Color;\n",
         "    gl_TexCoord[0] =  gl_MultiTexCoord0;\n",
-        "   gl_TexCoord[1] = gl_MultiTexCoord1;\n",
+         "   gl_TexCoord[1] = gl_MultiTexCoord1;\n",
         "}"};
     
     const GLchar *fragment_shader[] = {
@@ -146,6 +146,11 @@ void Window::renderCells(CellMatrix & cells){
                 cellSize};
             
             if(cells.getCellByPixel(i,j) != NULL){
+                
+                if(!cells.getCellByPixel(i,j)->is_visible){
+                    Drawing::drawRect(rect,COLOR_BLACK);
+                    continue;
+                }
                 
                 if((cells.getCellByPixel(i,j))->is_frozen){
                     Drawing::drawRect(rect,COLOR_BLACK);

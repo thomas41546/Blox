@@ -30,6 +30,8 @@ static Window * mainWindow;
 boost::thread * windowFlipThread;
 // TODO abstract out to EntityManager
 static std::vector<Entity *> entities;
+static std::vector<Entity *> lightEntities;
+
 
 int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
 {
@@ -137,8 +139,8 @@ int main( int argc, char* args[] ){
                         for(float rad = 0; rad < 6.28; rad += 0.02){
                             SDL_Rect bulletRect = {playerEntity->x,playerEntity->y,5,5};
                             BulletEntity * bullet =new BulletEntity(bulletRect);
-                            bullet->vx = cos(rad + (rand() % 100)/100.0)*9;
-                            bullet->vy = sin(rad + (rand() % 100)/100.0)*9;
+                            bullet->vx = cos(rad)*9;
+                            bullet->vy = sin(rad)*9;
                             
                             entities.push_back(bullet);
                         }
@@ -170,19 +172,55 @@ int main( int argc, char* args[] ){
         
         
         //DEBUG TODO remove
-        
-        for(int j = 0; j <= 2000 ; j+= CellMatrix::getCellSize()){
-            for(int i = 0; i <=  2000; i+=CellMatrix::getCellSize()){
+        for(unsigned int j = 0; j <= cells.getHeight() ; j+= CellMatrix::getCellSize()){
+            for(unsigned int i = 0; i <=  cells.getWidth() ; i+=CellMatrix::getCellSize()){
                 Cell * cell = cells.getCellByPixel(i,j);
                 if( cell!= NULL){
                     cell->is_hit -= 1;
-                    if(cell->is_hit  < 0) cell->is_hit  =0;
+                    if(cell->is_hit < 0) cell->is_hit  =0;
+                    cell->is_visible = 0;
                 }
-                
             }
         }
         
-        
+        for(float rad = 0; rad < 6.28; rad += 0.01){
+            SDL_Rect lightRect = {playerEntity->x,playerEntity->y,5,5};
+            LightEntity * light =new LightEntity(lightRect);
+            light->vx = cos(rad )*9;
+            light->vy = sin(rad )*9;
+            lightEntities.push_back(light);
+        }
+        for (std::vector<Entity *>::iterator it = lightEntities.begin() ; it != lightEntities.end(); ++it){
+            Entity * entity =  ((Entity *)(*it));
+            int collideDepth = 0;
+            for(int i = 0; i < 200; i++){
+                SDL_Rect entityRect;
+                entityRect = entity->getRect();
+                entityRect.y += entity->vy;
+                entityRect.x += entity->vx;
+                int i,j;
+                for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
+                    for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
+                        Cell * cell = cells.getCellByPixel(i,j);
+                        if(cell== NULL)continue;
+                        cell->is_visible = 1;
+                        if(cell->is_frozen){
+                            entity->setDead();
+                            collideDepth++;
+                        }
+                    }
+                }
+                
+                if(collideDepth) collideDepth++;
+                entity->y += entity->vy;
+                entity->x += entity->vx;
+                
+                if(collideDepth > 6)
+                    break;
+            }
+            
+        }
+        lightEntities.clear();
         
         //physics
         for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
@@ -194,10 +232,9 @@ int main( int argc, char* args[] ){
             
             if(entity->vy > MAX_VELOCITY) entity->vy = MAX_VELOCITY;
             else if(entity->vy < -1*MAX_VELOCITY) entity->vy = -1*MAX_VELOCITY;
-            
             if(entity->vx > MAX_VELOCITY) entity->vx = MAX_VELOCITY;
             else if(entity->vx < -1*MAX_VELOCITY) entity->vx = -1*MAX_VELOCITY;
-                
+            
             SDL_Rect entityRect;
             entityRect = entity->getRect();
             entityRect.y += entity->vy;
@@ -215,7 +252,9 @@ int main( int argc, char* args[] ){
             for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
                 for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
                     Cell * cell = cells.getCellByPixel(i,j);
-                    if( cell!= NULL && cell->is_frozen){
+                    if(cell== NULL)continue;
+                    
+                    if(cell->is_frozen){
                         cell->is_hit = 100;;
                         
                         if(entity->getType() == Entity::BULLET){
@@ -228,7 +267,7 @@ int main( int argc, char* args[] ){
                             goto NEXT_ENTITY;
                         }
                         
-                        if(entity->getType() == Entity::NPC_WORM){
+                        else if(entity->getType() == Entity::NPC_WORM){
                             cells.getCellByPixel(i,j)->is_frozen = 0;
                             for(int ix = -1; ix <= 1; ix++)
                                 for(int iy = -1; iy <= 1; iy++)
@@ -237,11 +276,11 @@ int main( int argc, char* args[] ){
                             continue;
                         }
                         
+                        
                         entity->vx = 0;
                         entity->vy = 0;
                         collidedY = 1;
                         collidedX = 1;
-                        
                     }
                 }
             }
@@ -261,7 +300,6 @@ int main( int argc, char* args[] ){
             
             NEXT_ENTITY:
             continue;
-            //nothing
             
         }
         

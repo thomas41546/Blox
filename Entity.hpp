@@ -21,7 +21,7 @@ class Entity{
 protected:
     bool dead;
 public:
-    enum EntityType { NPC,NPC_WORM,PLAYER,BULLET,DEFAULT};
+    enum EntityType { NPC,NPC_WORM,PLAYER,BULLET,LIGHT,DEFAULT};
     
     //TODO encapsulate
     unsigned int width,height;
@@ -114,6 +114,19 @@ private:
     
 public:
     BulletEntity(SDL_Rect _dimensions);
+    virtual EntityType getType();
+    virtual void render(SDL_Surface* surface, int offsetX, int offsetY);
+    virtual void applyGravity(float mag);
+    virtual void applyHorizontalDrag(float mag);
+    virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells);
+};
+
+class LightEntity: public Entity{
+private:
+    unsigned int lifetime;
+    static const unsigned int LIGHT_LIFE = 100;
+public:
+    LightEntity(SDL_Rect _dimensions);
     virtual EntityType getType();
     virtual void render(SDL_Surface* surface, int offsetX, int offsetY);
     virtual void applyGravity(float mag);

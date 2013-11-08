@@ -16,6 +16,14 @@
 class Drawing {
 
 public:
+    static void drawRectPlain(SDL_Rect & rect, const SDL_Color & color){
+        glColor3f(color.r/255.0f,color.g/255.0f,color.b/255.0f);
+        glVertex2i(rect.x, rect.y);
+        glVertex2i(rect.x, rect.y + rect.h);
+        glVertex2i(rect.x + rect.w, rect.y + rect.h);
+        glVertex2i(rect.x + rect.w, rect.y);
+    }
+    
     static void drawRect(SDL_Rect & rect, const SDL_Color & color){
         glColor3f(color.r/255.0f,color.g/255.0f,color.b/255.0f);
         glTexCoord2i(0,0); glVertex2i(rect.x, rect.y);

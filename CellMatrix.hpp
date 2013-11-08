@@ -13,9 +13,10 @@
 #include <time.h>
 class Cell{
 public:
-    unsigned int is_frozen;
-    unsigned int is_slope;
-    int is_hit;
+    unsigned char is_frozen;
+    unsigned char  is_slope;
+    unsigned char is_visible;
+    int  is_hit;
 };
 
 class CellMatrix {
