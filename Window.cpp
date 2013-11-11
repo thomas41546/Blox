@@ -21,19 +21,26 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     font = TTF_OpenFont( "FreeMonoBold.ttf", 25 );
     assert(font != NULL);
     
+    setupOpenGL();
+    
+};
+
+void Window::setupOpenGL(){
+    //Load Textures
+    textures["block"] = Drawing::loadTexture("dirty1.png");
+    
+    // Opengl Defaults for 2D
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     glOrtho(0.f, width, height, 0.f, 1.f, 1000.f);
     
-    //Initialize Modelview Matrix
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
     glTranslatef(0.f, 0.f, -500.f);
     
-    glClearColor( COLOR_LOUNGE.r/255.0, COLOR_LOUNGE.g/255.0,COLOR_LOUNGE.b/255.0, 1.f );
+    glClearColor( 0.f,1.f,0.f, 1.f );
     
-    blockTexture = Drawing::loadTexture("dirty1.png");
-    
+    //Setup shaders
     const GLchar *vertex_shader[] ={
         "void main(void) {\n",
         "    gl_Position = ftransform();\n",
@@ -50,14 +57,11 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
         "}"
     };
     static ShaderLoader prog(vertex_shader, fragment_shader);
-    //prog();
-    //TODO fix fragment_shader
+    //prog(); TODO fix fragment_shader
     
-    //Check for error
     GLenum error = glGetError();
     assert(error == GL_NO_ERROR);
-    
-};
+}
 
 
 unsigned int Window::getX () {return x;}
@@ -67,6 +71,12 @@ unsigned int Window::getWidth () {return width;}
 unsigned int Window::getHeight () {return height;}
 
 SDL_Surface* Window::getSurface () {return surface;}
+
+
+SDL_Rect Window::getRect(){
+    SDL_Rect rect = {x,y,width,height};
+    return rect;
+}
 
 void  Window::scrollHorizonally(int amount) {
     if(x + amount >= maxScrollWidth) {
@@ -101,10 +111,20 @@ void Window::renderStart(){
     //SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
     
     glClear( GL_COLOR_BUFFER_BIT );
+    glDisable(GL_TEXTURE_2D);
+    glBegin( GL_QUADS );
+    SDL_Rect rect = getRect();
+    rect.x = 0;
+    rect.y = 0;
+    Drawing::drawRect(rect,COLOR_LOUNGE);
+    glEnd();
+
+    
     glEnable( GL_TEXTURE_2D );
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,GL_MODULATE);//GL_MODULATE
-    glBindTexture( GL_TEXTURE_2D, blockTexture );
+    glBindTexture( GL_TEXTURE_2D, textures["block"] );
     glBegin( GL_QUADS );
+    
 };
 
 void Window::renderFont(int ox, int oy, std::string text){

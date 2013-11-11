@@ -10,11 +10,10 @@
 #include <iostream>
 #include <boost/foreach.hpp>
 #include <boost/thread/thread.hpp>
-#include <boost/thread/thread.hpp>
+#include <map>
 #include <assert.h>
 #include <vector>
 #include <math.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -30,17 +29,19 @@ private:
     unsigned int maxScrollWidth;
     unsigned int maxScrollHeight;
 
+    std::map<std::string, GLuint> textures;
+    
     TTF_Font* font;    
     SDL_Surface* surface;
     
     GLuint blockTexture;
     
+    void setupOpenGL();
+    
     SDL_Surface* getSurface ();
     
     
 public:
-    
-    
     Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight);
     
     unsigned int getX();
@@ -49,6 +50,7 @@ public:
     unsigned int getWidth ();
     unsigned int getHeight ();
     
+    SDL_Rect getRect();
     
     void scrollHorizonally(int amount);
     
