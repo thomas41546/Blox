@@ -16,6 +16,9 @@ public:
     unsigned int is_frozen;
     unsigned int is_slope;
     int is_hit;
+    
+    SDL_Color color;
+    //TODO make cell a class
 };
 
 class CellMatrix {

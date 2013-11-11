@@ -10,9 +10,10 @@ const SDL_Color COLOR_RED =     {255,0,0,255};
 const SDL_Color COLOR_RED2 =    {0xEE,0,0,255};
 const SDL_Color COLOR_BLUE =    {0x33,0xCC,0xFF,255};
 const SDL_Color COLOR_GREEN =   {0,255,0,255};
+const SDL_Color COLOR_LOUNGE = {0x70,0xA8,0xA8};
 
-const int CELL_WIDTH =   4000;
-const int CELL_HEIGHT =   4000;
+const int CELL_WIDTH =   1000;
+const int CELL_HEIGHT =   1000;
 const int SCREEN_WIDTH =   1200;
 const int SCREEN_HEIGHT =   800;
 

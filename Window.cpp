@@ -32,7 +32,7 @@ Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int
     glLoadIdentity();
     glTranslatef(0.f, 0.f, -500.f);
     
-    glClearColor( 1.f, 1.f, 1.f, 1.f );
+    glClearColor( COLOR_LOUNGE.r/255.0, COLOR_LOUNGE.g/255.0,COLOR_LOUNGE.b/255.0, 1.f );
     
     blockTexture = Drawing::loadTexture("dirty1.png");
     
@@ -148,7 +148,8 @@ void Window::renderCells(CellMatrix & cells){
             if(cells.getCellByPixel(i,j) != NULL){
                 
                 if((cells.getCellByPixel(i,j))->is_frozen){
-                    Drawing::drawRect(rect,COLOR_BLACK);
+                    
+                    Drawing::drawRect(rect,(cells.getCellByPixel(i,j))->color);//Drawing::drawRect(rect,COLOR_BLACK);
                     rect.x += 1;
                     rect.y += 1;
                     rect.w -= 2;
@@ -156,11 +157,12 @@ void Window::renderCells(CellMatrix & cells){
                     if(cells.getCellByPixel(i,j)->is_hit > 0){
                         Drawing::drawRect(rect,COLOR_GREEN);
                     }else{
-                        Drawing::drawRect(rect,COLOR_WHITE);
+                        Drawing::drawRect(rect,(cells.getCellByPixel(i,j))->color);
                     }
                     
                 }
                 else{
+                    continue;//TODO REMOVE
                     if( cells.getCellByPixel(i,j)->is_slope == 1){
                         Drawing::drawRightTriangleLeft(rect,COLOR_BLACK);
                         rect.x -= 0;
