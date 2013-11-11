@@ -5,18 +5,14 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
     width = _width;
     height = _height;
     matrix = new Cell[width*height]();
-    /*
-    (getCellIndex(1,55))->is_frozen = 1;
-    (getCellIndex(41,55))->is_frozen = 1;
-    (getCellIndex(42,55))->is_frozen = 1;
-     */
-    //map generation
     
     Perlin noiseGen(2,50,9,0);
     
     unsigned x,y;
     for(y = 0; y < height; y++){
         for(x = 0; x < width; x++){
+            (getCellIndex(x,y))->setCellMatrix(this);
+            
             
             float getnoise = noiseGen.Get((float)x/(float)width,(float)y/(float)height) ;
             if(getnoise > 0.8) getnoise = 0.8;
@@ -41,48 +37,22 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
                 case 0:
                 case 1:
                 case 2:
-                    (getCellIndex(x,y))->is_frozen = 0; 
+                    (getCellIndex(x,y))->resetFilled();
                     break;
                     
                 default:
                     colorChoice = colorGrad[groundType - 3];
-                    (getCellIndex(x,y))->color.r = colorChoice >> 16;
-                    (getCellIndex(x,y))->color.g =  (colorChoice >> 8) & 0xFF;
-                    (getCellIndex(x,y))->color.b = colorChoice & 0xFF;
-                    (getCellIndex(x,y))->is_frozen = 1;
+                    SDL_Color color;
+                    
+                    color.r = colorChoice >> 16;
+                    color.g =  (colorChoice >> 8) & 0xFF;
+                    color.b = colorChoice & 0xFF;
+                    (getCellIndex(x,y))->setBaseColor(color);
+                    
+                    (getCellIndex(x,y))->setFilled();
                     break;
                     
             }
-            
-            //(getCellIndex(i,j))->is_frozen = 1; //ALL
-            /*
-            if(j > 55 && j < 57){
-                (getCellIndex(i,j))->is_frozen = 1;
-            }
-            if(i > 55 && i < 57){
-                (getCellIndex(i,j))->is_frozen = 1;
-            }            
-            
-            
-             if(rand() % 50 == 0)
-             (getCellIndex(i,j))->is_frozen = 1;
-             else{
-             if(i > 0 && j > 0 && i < width-1 && j < height-1){
-             if(getCellIndex(i,j+1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
-             if(getCellIndex(i+1,j)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
-             if(getCellIndex(i,j-1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
-             if(getCellIndex(i-1,j)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
-             if(getCellIndex(i-1,j-1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
-             if(getCellIndex(i+1,j+1)->is_frozen && rand() % 3 == 0) (getCellIndex(i,j))->is_frozen = 1;
-             }
-             }
-            */
-            /*
-            if(sqrt((i - 40)*(i -40)+ (j - 40)*(j - 40)) < 40)
-                (getCellIndex(i,j))->is_frozen = 0;
-            else
-                (getCellIndex(i,j))->is_frozen = 1;
-            */
             
         }
     }
@@ -100,22 +70,21 @@ void CellMatrix::calcSlopes(int i, int j){
     if(i <= 1 || i >= (int)width -1)return;
     if(j <= 1 || j >= (int)height -1)return;
     
-    (getCellIndex(i,j))->is_slope = 0;
-    if(!(getCellIndex(i,j))->is_frozen){
-        if((getCellIndex(i,j+1))->is_frozen &&
-           (getCellIndex(i-1,j))->is_frozen &&
-           !(getCellIndex(i+1,j-1))->is_frozen &&
-           !(getCellIndex(i+1,j))->is_frozen &&
-           !(getCellIndex(i,j-1))->is_frozen){
-            (getCellIndex(i,j))->is_slope = 1;
+    (getCellIndex(i,j))->resetSlope();
+    if(!(getCellIndex(i,j))->isFilled()){
+        if((getCellIndex(i,j+1))->isFilled() &&
+           (getCellIndex(i-1,j))->isFilled() &&
+           !(getCellIndex(i+1,j-1))->isFilled() &&
+           !(getCellIndex(i+1,j))->isFilled() &&
+           !(getCellIndex(i,j-1))->isFilled()){
+            (getCellIndex(i,j))->setSlope(Cell::LEFT);
         }
-        else if((getCellIndex(i+1,j))->is_frozen &&
-                (getCellIndex(i,j+1))->is_frozen &&
-                !(getCellIndex(i-1,j))->is_frozen &&
-                !(getCellIndex(i-1,j-1))->is_frozen &&
-                !(getCellIndex(i,j-1))->is_frozen){
-            
-            (getCellIndex(i,j))->is_slope = 2;
+        else if((getCellIndex(i+1,j))->isFilled() &&
+                (getCellIndex(i,j+1))->isFilled() &&
+                !(getCellIndex(i-1,j))->isFilled() &&
+                !(getCellIndex(i-1,j-1))->isFilled() &&
+                !(getCellIndex(i,j-1))->isFilled()){
+            (getCellIndex(i,j))->setSlope(Cell::RIGHT);
         }
     }
 }
@@ -123,6 +92,20 @@ void CellMatrix::calcSlopes(int i, int j){
 unsigned int CellMatrix::getWidth () {return width;}
 unsigned int CellMatrix::getHeight () {return height;}
 
+
+bool CellMatrix::destroyCellByPixel(int i, int j){
+    
+    Cell * cell = getCellByPixel(i,j);
+    
+    if(cell->destroy()){
+        for(int ix = -1; ix <= 1; ix++)
+            for(int iy = -1; iy <= 1; iy++)
+                calcSlopes(i/CellMatrix::getCellSize() + ix, j/CellMatrix::getCellSize() + iy);
+        
+        return true;
+    }
+    return false;
+}
 
 Cell * CellMatrix::getCellIndex(unsigned int x, unsigned int y){
     if (x < width && y < height){

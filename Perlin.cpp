@@ -1,10 +1,6 @@
 /* coherent noise function over 1, 2 or 3 dimensions */
 /* (copyright Ken Perlin) */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
 #include "Perlin.hpp"
 
 #define B SAMPLE_SIZE

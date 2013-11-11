@@ -2,6 +2,12 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:Blox.hpp">
+   </FileRef>
+   <FileRef
+      location = "group:Cell.hpp">
+   </FileRef>
+   <FileRef
       location = "group:ShaderLoader.hpp">
    </FileRef>
    <FileRef
@@ -29,6 +35,15 @@
       location = "group:Window.hpp">
    </FileRef>
    <FileRef
+      location = "group:Perlin.hpp">
+   </FileRef>
+   <FileRef
+      location = "group:Cell.cpp">
+   </FileRef>
+   <FileRef
+      location = "group:Perlin.cpp">
+   </FileRef>
+   <FileRef
       location = "group:CellMatrix.cpp">
    </FileRef>
    <FileRef
@@ -42,8 +57,5 @@
    </FileRef>
    <FileRef
       location = "group:Blox.cpp">
-   </FileRef>
-   <FileRef
-      location = "group:tex.c">
    </FileRef>
 </Workspace>

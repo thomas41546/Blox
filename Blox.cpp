@@ -5,25 +5,12 @@
  Licence: None. Use as you wish. However, some credit would be nice.
  */
 
-#include "SDL/SDL.h"
-#include "SDL/SDL_opengl.h"
-
+#include "Blox.hpp"
 #include "Globals.hpp"
 #include "Entity.hpp"
 #include "CellMatrix.hpp"
 #include "Window.hpp"
 #include "QuadTree.hpp"
-
-#include <string>
-#include <iostream>
-#include <boost/foreach.hpp>
-#include <boost/format.hpp>
-#include <vector>
-#include <math.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
 
 static CellMatrix cells(CELL_WIDTH,CELL_HEIGHT);
 static Window * mainWindow;
@@ -170,7 +157,7 @@ int main( int argc, char* args[] ){
         
         
         //DEBUG TODO remove
-        
+        /*
         for(int j = 0; j <= 2000 ; j+= CellMatrix::getCellSize()){
             for(int i = 0; i <=  2000; i+=CellMatrix::getCellSize()){
                 Cell * cell = cells.getCellByPixel(i,j);
@@ -181,8 +168,7 @@ int main( int argc, char* args[] ){
                 
             }
         }
-        
-        
+        */
         
         //physics
         for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
@@ -214,25 +200,20 @@ int main( int argc, char* args[] ){
             for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
                 for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
                     Cell * cell = cells.getCellByPixel(i,j);
-                    if( cell!= NULL && cell->is_frozen){
-                        cell->is_hit = 100;;
+                    if( cell!= NULL && cell->isFilled()){
                         
                         if(entity->getType() == Entity::BULLET){
-                            cells.getCellByPixel(i,j)->is_frozen = 0;
-                            for(int ix = -1; ix <= 1; ix++)
-                                for(int iy = -1; iy <= 1; iy++)
-                                    cells.calcSlopes(i/CellMatrix::getCellSize() + ix,
-                                                     j/CellMatrix::getCellSize() + iy);
-                            entity->setDead();
-                            goto NEXT_ENTITY;
+                            if(cells.destroyCellByPixel(i,j)){
+                                entity->setDead();
+                                goto NEXT_ENTITY;
+                            }
+                            else{
+                                continue;
+                            }
                         }
                         
                         if(entity->getType() == Entity::NPC_WORM){
-                            cells.getCellByPixel(i,j)->is_frozen = 0;
-                            for(int ix = -1; ix <= 1; ix++)
-                                for(int iy = -1; iy <= 1; iy++)
-                                    cells.calcSlopes(i/CellMatrix::getCellSize() + ix,
-                                                     j/CellMatrix::getCellSize() + iy);
+                            cells.destroyCellByPixel(i,j);
                             continue;
                         }
                         

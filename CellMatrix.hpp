@@ -1,6 +1,11 @@
 #ifndef __CELLMATRIX_H_INCLUDED__
 #define __CELLMATRIX_H_INCLUDED__
+
+
+#include "Cell.hpp"
+
 #include "SDL/SDL.h"
+
 #include <string>
 #include <iostream>
 #include <boost/foreach.hpp>
@@ -11,15 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-class Cell{
-public:
-    unsigned int is_frozen;
-    unsigned int is_slope;
-    int is_hit;
-    
-    SDL_Color color;
-    //TODO make cell a class
-};
+
 
 class CellMatrix {
 private:
@@ -37,6 +34,8 @@ public:
     unsigned int getHeight ();
     
     void calcSlopes(int i, int j);
+    
+    bool destroyCellByPixel(int i, int j);
     
     Cell * getCellIndex(unsigned int x, unsigned int y);
     Cell * getCellByPixel(unsigned int x, unsigned int y);

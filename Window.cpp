@@ -4,8 +4,6 @@
 #include "Window.hpp"
 #include "Drawing.hpp"
 #include "ShaderLoader.hpp"
-#include "SDL/SDL_ttf.h"
-#include "SDL/SDL_opengl.h"
 
 Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight){
     x = _x;
@@ -146,42 +144,7 @@ void Window::renderCells(CellMatrix & cells){
                 cellSize};
             
             if(cells.getCellByPixel(i,j) != NULL){
-                
-                if((cells.getCellByPixel(i,j))->is_frozen){
-                    
-                    Drawing::drawRect(rect,(cells.getCellByPixel(i,j))->color);//Drawing::drawRect(rect,COLOR_BLACK);
-                    rect.x += 1;
-                    rect.y += 1;
-                    rect.w -= 2;
-                    rect.h -= 2;
-                    if(cells.getCellByPixel(i,j)->is_hit > 0){
-                        Drawing::drawRect(rect,COLOR_GREEN);
-                    }else{
-                        Drawing::drawRect(rect,(cells.getCellByPixel(i,j))->color);
-                    }
-                    
-                }
-                else{
-                    continue;//TODO REMOVE
-                    if( cells.getCellByPixel(i,j)->is_slope == 1){
-                        Drawing::drawRightTriangleLeft(rect,COLOR_BLACK);
-                        rect.x -= 0;
-                        rect.y += 2;
-                        rect.w -= 2;
-                        rect.h -= 2;
-                        Drawing::drawRightTriangleLeft(rect,COLOR_WHITE);
-                        continue;
-                    }
-                    else if( cells.getCellByPixel(i,j)->is_slope == 2){
-                        Drawing::drawRightTriangleRight(rect,COLOR_BLACK);
-                        rect.x += 2;
-                        rect.y += 2;
-                        rect.w -= 2;
-                        rect.h -= 2;
-                        Drawing::drawRightTriangleRight(rect,COLOR_WHITE);
-                        continue;
-                    }
-                }
+                cells.getCellByPixel(i,j)->render(rect);
             }
         }
     }
