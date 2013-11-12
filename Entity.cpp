@@ -96,12 +96,15 @@ void NPCEntity::collidedWith(Entity * other){
 }
 
  void NPCEntity::applyAI(std::vector<Entity *> & entities){
-    if(abs(vy) < 0.01 &&  abs(vx) < 0.01 && hitGround){
-        vy -= rand()% 6 + 1;
+    if(abs(vy) < 0.01 &&  abs(vx) < 0.01 && hitGround == 4){
+        
+        if(rand() % 2){
+            vy -= rand()% 6 + 1;
+        }
         if(playerEntity->x < x)
-            vx -= rand()% 10 ;
+            vx -= rand()% 5 ;
         else if(playerEntity->x > x)
-            vx += rand()% 10;
+            vx += rand()% 5;
     }
 }
  Entity::EntityType NPCEntity::getType(){

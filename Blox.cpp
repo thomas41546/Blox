@@ -73,7 +73,7 @@ int main( int argc, char* args[] ){
     //boost::thread t(boost::bind(&render_flip));
     //windowFlipThread = &t;
     
-    SDL_Rect playerRect = {500,500,10,20};
+    SDL_Rect playerRect = {500,500,20,20};
     playerEntity = new PlayerEntity(playerRect, &cells);
     entities.push_back((Entity *)playerEntity);
     
@@ -124,8 +124,10 @@ int main( int argc, char* args[] ){
                     }
                     
                     else if(event.key.keysym.sym == SDLK_UP){
-                        if(playerEntity->hitGround == 4)
-                            playerEntity->vy -= 5;
+                        if(playerEntity->hitGround == 4){
+                            playerEntity->vy = -5;
+                            playerEntity->hitGround = 0;
+                        }
                     }
                     else if(event.key.keysym.sym == SDLK_SPACE){
                         
@@ -163,21 +165,6 @@ int main( int argc, char* args[] ){
              }
          }
         
-        
-        //DEBUG TODO remove
-        /*
-        for(int j = 0; j <= 2000 ; j+= CellMatrix::getCellSize()){
-            for(int i = 0; i <=  2000; i+=CellMatrix::getCellSize()){
-                Cell * cell = cells.getCellByPixel(i,j);
-                if( cell!= NULL){
-                    cell->is_hit -= 1;
-                    if(cell->is_hit  < 0) cell->is_hit  =0;
-                }
-                
-            }
-        }
-        */
-        
         //physics
         for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
             Entity * entity =  ((Entity *)(*it));
@@ -190,16 +177,6 @@ int main( int argc, char* args[] ){
             
             if(entity->vx > MAX_VELOCITY) entity->vx = MAX_VELOCITY;
             else if(entity->vx < -1*MAX_VELOCITY) entity->vx = -1*MAX_VELOCITY;
-                
-            SDL_Rect entityRect;
-            entityRect = entity->getRect();
-            entityRect.y += entity->vy;
-            entityRect.x += entity->vx;
-            
-            if(entityRect.x < 0 || entityRect.y < 0){
-                entity->setDead();
-                continue;
-            }
             
             bool collidedY = false;
             bool collidedX = false;
@@ -223,15 +200,15 @@ int main( int argc, char* args[] ){
                     }
                 }
                 if(collidedY){
-                    entity->vy *= 0.9;
-                    if(++entity->hitGround > 4) entity->hitGround = 4;
+                    entity->vy *= 0.3;
+                    if(++entity->hitGround > 4 && entity->vy > 0) entity->hitGround = 4;
                 }
                 else{
                      entity->y += entity->vy;
                      entity->hitGround = 0;
                 }
                 
-                ////////
+                //////// 
                 
                 startIndexJ = MIN(entity->y,entity->y) / CellMatrix::getCellSize();
                 endIndexJ = MAX(entity->y + entity->height*0.9, entity->y + entity->height*0.9) / CellMatrix::getCellSize();
@@ -249,15 +226,66 @@ int main( int argc, char* args[] ){
                     }
                 }
                 if(collidedX){
-                    entity->vx *= 0.9;
+                    entity->vx *= 0.3;
                 }
                 else{
                     entity->x += entity->vx;
                 }
                 
+                
+                //slope stuff
+                
+                int oldY = entity->y;
+
+                startIndexJ = MIN(entity->y,entity->y) / CellMatrix::getCellSize();
+                endIndexJ = MAX(entity->y + entity->height*0.9, entity->y + entity->height*0.9) / CellMatrix::getCellSize();
+                
+                startIndexI = MIN(entity->x,entity->x) / CellMatrix::getCellSize();
+                endIndexI = MAX(entity->x + entity->width*0.9, entity->x + entity->width*0.9) / CellMatrix::getCellSize();
+                
+                for(j = startIndexJ; j <= endIndexJ; j++){
+                    for(i = startIndexI; i <= endIndexI; i++){
+                        Cell * cell = cells.getCellIndex(i,j);
+                        if(cell->getSlope() != Cell::NONE){
+                            
+                            if(std::abs(entity->vx) > 0.1 &&  entity->vy < 0.1){
+                                entity->y -= CellMatrix::getCellSize();
+                            }
+                            //printf("slope hit x/%2.4f y/%2.4f diff/%2.4f\n",xdiff,ydiff,std::abs(xdiff - ydiff));
+ 
+                            goto END_SLOPE_CALC;
+                        }
+                    }
+                }
+                END_SLOPE_CALC:
+                
+                // check if our slope stuff caused us to collide
+                startIndexJ = MIN(entity->y,entity->y) / CellMatrix::getCellSize();
+                endIndexJ = MAX(entity->y + entity->height*0.9, entity->y + entity->height*0.9) / CellMatrix::getCellSize();
+                for(j = startIndexJ; j <= endIndexJ; j++){
+                    for(i = startIndexI; i <= endIndexI; i++){
+                         Cell * cell = cells.getCellIndex(i,j);
+                        if(cell->isFilled()){
+                            entity->y = oldY;
+                        }
+                    }
+                }
+                continue;
+                
 
             }
             else{
+                
+                SDL_Rect entityRect;
+                entityRect = entity->getRect();
+                entityRect.y += entity->vy;
+                entityRect.x += entity->vx;
+                
+                if(entityRect.x < 0 || entityRect.y < 0){
+                    entity->setDead();
+                    continue;
+                }
+                
                 for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
                     for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
                         Cell * cell = cells.getCellByPixel(i,j);
@@ -294,16 +322,25 @@ int main( int argc, char* args[] ){
         }
         
         
-        // set window position
-        //TODO make this a moving window when you get to the sides
+        // target positions
         int nx,ny;
-        nx = playerEntity->x - (int)500;
-        ny = playerEntity->y - (int)500;
+        nx = playerEntity->x - (int)mainWindow->getWidth()/2;
+        ny = playerEntity->y - (int)mainWindow->getHeight()/2;
         if(nx < 0) nx = 0;
         if(ny < 0) ny = 0;
         
-        mainWindow->setXY(nx,ny);
+        int xpandiff = nx - mainWindow->getX();
+        if(abs(xpandiff) > 300){
+            mainWindow->setXY(mainWindow->getX() + (xpandiff > 0 ? 10 : -10),mainWindow->getY());
+        }
         
+        int ypandiff = ny - mainWindow->getY();
+        if(abs(ypandiff) > 300){
+            mainWindow->setXY(mainWindow->getX(),mainWindow->getY() + (ypandiff > 0 ? 10 : -10));
+        }
+        
+
+        //TODO zoom into main character more --> make him look more important
         mainWindow->renderStart();
         mainWindow->renderCells(cells);
         mainWindow->renderEntities(entities);

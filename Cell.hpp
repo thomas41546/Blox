@@ -32,6 +32,7 @@ public:
     bool destroy();
     
     void setSlope(SlopeType _slope);
+    SlopeType getSlope();
     void resetSlope();
     
     void setEdge();

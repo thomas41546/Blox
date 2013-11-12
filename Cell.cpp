@@ -16,6 +16,7 @@ Cell::Cell(){
     is_edge = false;
     slope = NONE;
 }
+
 void Cell::setCellMatrix(CellMatrix * _cellMatrix){
     cellMatrix = _cellMatrix;
 }
@@ -47,6 +48,10 @@ void Cell::setFilled(){
 
 void Cell::resetFilled(){
     is_filled = false;
+}
+
+Cell::SlopeType Cell::getSlope(){
+    return slope;
 }
 
 void Cell::setSlope(SlopeType _slope){
