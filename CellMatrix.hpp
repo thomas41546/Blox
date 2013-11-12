@@ -34,6 +34,7 @@ public:
     unsigned int getHeight ();
     
     void calcSlopes(int i, int j);
+    void calcEdges(int i, int j);
     
     bool destroyCellByPixel(int i, int j);
     

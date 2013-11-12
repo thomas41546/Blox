@@ -61,9 +61,29 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
     for(j = 1; j < height - 1; j++){
         for(i = 1; i < width - 1; i++){
             calcSlopes(i,j);
+            calcEdges(i,j);
         }
     }
     
+}
+
+void CellMatrix::calcEdges(int i, int j){
+    if(i <= 1 || i >= (int)width -1)return;
+    if(j <= 1 || j >= (int)height -1)return;
+    
+    
+    (getCellIndex(i,j))->resetEdge();
+    if(!(getCellIndex(i,j))->isFilled()){
+        for(int oy = -1; oy <= 1; oy++){
+            for(int ox = -1; ox <= 1; ox++){
+                if(ox == 0 && oy == 0) continue;
+                if((getCellIndex(i+ox,j+oy))->isFilled()){
+                    (getCellIndex(i,j))->setEdge();
+                    return;
+                }
+            }
+        }
+    }
 }
 
 void CellMatrix::calcSlopes(int i, int j){
@@ -99,8 +119,10 @@ bool CellMatrix::destroyCellByPixel(int i, int j){
     
     if(cell->destroy()){
         for(int ix = -1; ix <= 1; ix++)
-            for(int iy = -1; iy <= 1; iy++)
+            for(int iy = -1; iy <= 1; iy++){
+                calcEdges(i/CellMatrix::getCellSize() + ix, j/CellMatrix::getCellSize() + iy);
                 calcSlopes(i/CellMatrix::getCellSize() + ix, j/CellMatrix::getCellSize() + iy);
+            }
         
         return true;
     }

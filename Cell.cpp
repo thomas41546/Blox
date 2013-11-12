@@ -13,6 +13,7 @@ Cell::Cell(){
     cellMatrix = NULL;
     is_breakable = true;
     is_filled = false;
+    is_edge = false;
     slope = NONE;
 }
 void Cell::setCellMatrix(CellMatrix * _cellMatrix){
@@ -26,6 +27,19 @@ bool Cell::destroy(){
     is_filled = false;
     return true;
 }
+
+
+void Cell::setEdge(){
+    is_edge = true;
+}
+
+void Cell::resetEdge(){
+    is_edge = false;
+}
+bool Cell::isEdge(){
+    return is_edge;
+}
+
 
 void Cell::setFilled(){
     is_filled = true;
@@ -64,4 +78,10 @@ void Cell::render(SDL_Rect & rect){
     else if( slope == RIGHT){
         Drawing::drawRightTriangleRight(rect,base_color);
     }
+    
+    if(is_edge){
+        Drawing::drawRect(rect,COLOR_RED);
+    }
+    
+    
 }

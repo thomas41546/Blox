@@ -17,6 +17,8 @@ public:
 private:    
     bool is_filled;
     bool is_breakable;
+    
+    bool is_edge;
     SlopeType slope;
     
     CellMatrix * cellMatrix;
@@ -31,6 +33,10 @@ public:
     
     void setSlope(SlopeType _slope);
     void resetSlope();
+    
+    void setEdge();
+    void resetEdge();
+    bool isEdge();
     
     void setFilled();
     void resetFilled();
