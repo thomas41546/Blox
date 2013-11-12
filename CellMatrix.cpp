@@ -13,7 +13,6 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
         for(x = 0; x < width; x++){
             (getCellIndex(x,y))->setCellMatrix(this);
             
-            
             float getnoise = noiseGen.Get((float)x/(float)width,(float)y/(float)height) ;
             if(getnoise > 0.8) getnoise = 0.8;
             if(getnoise < -0.8) getnoise = -0.8;
@@ -56,6 +55,12 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
             
         }
     }
+    for(y = 40; y < 60; y++){
+        for(x = 40; x < 60; x++){
+            (getCellIndex(x,y))->resetFilled();
+        }
+    }
+    
     
     unsigned i,j;
     for(j = 1; j < height - 1; j++){

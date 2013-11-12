@@ -3,8 +3,8 @@
 #include "Drawing.hpp"
 
 Entity::Entity(SDL_Rect _dimensions,CellMatrix * _cellMatrix){
-    x = (double)_dimensions.x;
-    y = (double)_dimensions.y;
+    x = (int)_dimensions.x;
+    y = (int)_dimensions.y;
     width = _dimensions.w;
     height = _dimensions.h;
     cellMatrix = _cellMatrix;
@@ -114,17 +114,16 @@ LineyEntity::LineyEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix) : NPCEn
 }
 
 void LineyEntity::applyAI(std::vector<Entity *> & entities){
-    unsigned i = x / CellMatrix::getCellSize();
-    unsigned j = y / CellMatrix::getCellSize();
+   // unsigned i = x / CellMatrix::getCellSize();
+   // unsigned j = y / CellMatrix::getCellSize();
     
-    Cell * cell = cellMatrix->getCellIndex(i,j);
-    
-    if(cell->isEdge()){
-        
-    }
 }
 
 void LineyEntity::applyGravity(float mag){
+    Cell * cell = cellMatrix->getCellByPixel(x,y);
+    if(cell != NULL && !cell->isEdge()){
+         vy += mag;
+    }
 }
 
 void LineyEntity::applyHorizontalDrag(float mag){

@@ -80,7 +80,7 @@ void Cell::render(SDL_Rect & rect){
     }
     
     if(is_edge){
-        Drawing::drawRect(rect,COLOR_RED);
+        //Drawing::drawRect(rect,COLOR_RED);
     }
     
     

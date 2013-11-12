@@ -80,10 +80,16 @@ int main( int argc, char* args[] ){
     SDL_Rect wormRect = {500,500,40,40};
     entities.push_back(new WormEntity(wormRect,&cells, entities));
     
-    for(int i = 0; i < 1000; i++){
+    for(int i = 0; i < 10; i++){
         SDL_Rect npcRect = {rand()%200 + 300,rand()%200 + 300,11,11};
         entities.push_back(new NPCEntity(npcRect,&cells));
     }
+    
+    /*
+    for(int i = 0; i < 1000; i++){
+        SDL_Rect npcRect = {rand()%200 + 300,rand()%200 + 300,11,11};
+        entities.push_back(new NPCEntity(npcRect,&cells));
+    }*/
     
     
     SDL_EnableKeyRepeat(1, 5);
@@ -111,22 +117,15 @@ int main( int argc, char* args[] ){
                     if(event.key.keysym.sym == SDLK_q)
                         is_game = 0;
                     else if(event.key.keysym.sym == SDLK_LEFT){
-                            playerEntity->vx -= 0.3;
-                        if(abs(playerEntity->vy) < 0.01){
-                            playerEntity->vy = -0.01;
-                        }
+                            playerEntity->vx = -2;
                     }
                     else if(event.key.keysym.sym == SDLK_RIGHT){
-                            playerEntity->vx += 0.3;
-                        if(abs(playerEntity->vy) < 0.01){
-                            playerEntity->vy = -0.01;
-                        }
+                            playerEntity->vx = 2;
                     }
                     
-                    
                     else if(event.key.keysym.sym == SDLK_UP){
-                        if( playerEntity->hitGround)
-                            playerEntity->vy -= 3;
+                        if(playerEntity->hitGround == 4)
+                            playerEntity->vy -= 5;
                     }
                     else if(event.key.keysym.sym == SDLK_SPACE){
                         
@@ -185,7 +184,6 @@ int main( int argc, char* args[] ){
             
             entity->applyGravity(0.1);
             entity->applyHorizontalDrag(0.9);
-            entity->hitGround = 0;
             
             if(entity->vy > MAX_VELOCITY) entity->vy = MAX_VELOCITY;
             else if(entity->vy < -1*MAX_VELOCITY) entity->vy = -1*MAX_VELOCITY;
@@ -197,6 +195,7 @@ int main( int argc, char* args[] ){
             entityRect = entity->getRect();
             entityRect.y += entity->vy;
             entityRect.x += entity->vx;
+            
             if(entityRect.x < 0 || entityRect.y < 0){
                 entity->setDead();
                 continue;
@@ -206,74 +205,87 @@ int main( int argc, char* args[] ){
             bool collidedX = false;
             int i,j;
             
-            for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
-                for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
-                    Cell * cell = cells.getCellByPixel(i,j);
-                    if( cell!= NULL && cell->isFilled()){
-                        
-                        if(entity->getType() == Entity::BULLET){
-                            if(cells.destroyCellByPixel(i,j)){
-                                entity->setDead();
-                                goto NEXT_ENTITY;
-                            }
-                            else{
-                                continue;
-                            }
+            if(entity->getType() != Entity::BULLET && entity->getType() != Entity::NPC_WORM){
+                
+                int startIndexJ = MIN(entity->y,entity->y + entity->vy) / CellMatrix::getCellSize();
+                int endIndexJ = MAX(entity->y + entity->height*0.9, entity->y + entity->height*0.9 + entity->vy) / CellMatrix::getCellSize();
+                
+                int startIndexI = MIN(entity->x,entity->x) / CellMatrix::getCellSize();
+                int endIndexI = MAX(entity->x + entity->width*0.9, entity->x + entity->width*0.9) / CellMatrix::getCellSize();
+                
+                collidedY = false;
+                for(j = startIndexJ; j <= endIndexJ; j++){
+                    for(i = startIndexI; i <= endIndexI; i++){
+                        Cell * cell = cells.getCellIndex(i,j);
+                        if(cell->isFilled()){
+                            collidedY = true;
                         }
-                        
-                        if(entity->getType() == Entity::NPC_WORM){
-                            cells.destroyCellByPixel(i,j);
-                            continue;
-                        }
-                        
-                        //above
-                        if(j <= (entityRect.y + entityRect.h/2)){
-                            if(entity->vy < 0){
-                                entity->vy *= 0.1;
-                                collidedY = true;
-                            }
-                        }
-                        else{  //below
-                            
-                            if(entity->vy > 0){
-                                entity->vy  *= 0.1;
-                                entity->hitGround = true;
-                                collidedY = true;
-                            }
-                        }
-                        //left
-                        if(i <= (entityRect.x + entityRect.w/2)){
-                            if(entity->vx < 0){
-                                entity->vx  *= 0.1;
-                                collidedX = true;
-                            }
-                        }
-                        else{  //right
-                            
-                            if(entity->vx > 0){
-                                entity->vx  *= 0.1;
-                                collidedX = true;
-                            }
-                        }
-                        collidedY = 1;
-                        collidedX = 1;
-                        
                     }
                 }
+                if(collidedY){
+                    entity->vy *= 0.9;
+                    if(++entity->hitGround > 4) entity->hitGround = 4;
+                }
+                else{
+                     entity->y += entity->vy;
+                     entity->hitGround = 0;
+                }
+                
+                ////////
+                
+                startIndexJ = MIN(entity->y,entity->y) / CellMatrix::getCellSize();
+                endIndexJ = MAX(entity->y + entity->height*0.9, entity->y + entity->height*0.9) / CellMatrix::getCellSize();
+                
+                startIndexI = MIN(entity->x,entity->x + entity->vx) / CellMatrix::getCellSize();
+                endIndexI = MAX(entity->x + entity->width*0.9, entity->x + entity->width*0.9 + entity->vx) / CellMatrix::getCellSize();
+                
+                collidedX = false;
+                for(j = startIndexJ; j <= endIndexJ; j++){
+                    for(i = startIndexI; i <= endIndexI; i++){
+                        Cell * cell = cells.getCellIndex(i,j);
+                        if(cell->isFilled()){
+                            collidedX = true;
+                        }
+                    }
+                }
+                if(collidedX){
+                    entity->vx *= 0.9;
+                }
+                else{
+                    entity->x += entity->vx;
+                }
+                
+
             }
-            
-            if(!collidedY){
-                entity->hitGround = false;
-            }
-            
-            if(!collidedX)
+            else{
+                for(j = entityRect.y; j <= entityRect.y + entityRect.h; j+= CellMatrix::getCellSize()){
+                    for(i = entityRect.x; i <=  entityRect.x + entityRect.w; i+=CellMatrix::getCellSize()){
+                        Cell * cell = cells.getCellByPixel(i,j);
+                        if( cell!= NULL && cell->isFilled()){
+                            
+                            if(entity->getType() == Entity::BULLET){ //TODO check for properties in entity instead of enum
+                                if(cells.destroyCellByPixel(i,j)){
+                                    entity->setDead();
+                                    goto NEXT_ENTITY;
+                                }
+                                else{
+                                    continue;
+                                }
+                            }
+                            
+                            
+                            if(entity->getType() == Entity::NPC_WORM){
+                                cells.destroyCellByPixel(i,j);
+                                continue;
+                            }
+                            
+                        }
+                    }
+                }
                 entity->x += entity->vx;
-            
-            if(!collidedY)
                 entity->y += entity->vy;
+            }
             
-            //if(abs(entity->vy) < 0.01) entity->vy = 0;
-            //if(abs(entity->vx) < 0.01) entity->vx = 0;
             
             NEXT_ENTITY:
             continue;

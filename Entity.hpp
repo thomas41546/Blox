@@ -27,7 +27,7 @@ public:
     unsigned int width,height;
     double vx,vy;
     double x,y;
-    bool hitGround;
+    int hitGround;
     int id;
     CellMatrix * cellMatrix;
     
