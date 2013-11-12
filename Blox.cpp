@@ -73,16 +73,16 @@ int main( int argc, char* args[] ){
     //boost::thread t(boost::bind(&render_flip));
     //windowFlipThread = &t;
     
-    SDL_Rect playerRect = {500,500,20,20};
-    playerEntity = new PlayerEntity(playerRect);
+    SDL_Rect playerRect = {500,500,10,20};
+    playerEntity = new PlayerEntity(playerRect, &cells);
     entities.push_back((Entity *)playerEntity);
     
     SDL_Rect wormRect = {500,500,40,40};
-    entities.push_back(new WormEntity(wormRect,entities));
+    entities.push_back(new WormEntity(wormRect,&cells, entities));
     
     for(int i = 0; i < 1000; i++){
         SDL_Rect npcRect = {rand()%200 + 300,rand()%200 + 300,11,11};
-        entities.push_back(new NPCEntity(npcRect));
+        entities.push_back(new NPCEntity(npcRect,&cells));
     }
     
     
@@ -110,10 +110,19 @@ int main( int argc, char* args[] ){
                 case SDL_KEYDOWN:
                     if(event.key.keysym.sym == SDLK_q)
                         is_game = 0;
-                    else if(event.key.keysym.sym == SDLK_LEFT)
+                    else if(event.key.keysym.sym == SDLK_LEFT){
                             playerEntity->vx -= 0.3;
-                    else if(event.key.keysym.sym == SDLK_RIGHT)
+                        if(abs(playerEntity->vy) < 0.01){
+                            playerEntity->vy = -0.01;
+                        }
+                    }
+                    else if(event.key.keysym.sym == SDLK_RIGHT){
                             playerEntity->vx += 0.3;
+                        if(abs(playerEntity->vy) < 0.01){
+                            playerEntity->vy = -0.01;
+                        }
+                    }
+                    
                     
                     else if(event.key.keysym.sym == SDLK_UP){
                         if( playerEntity->hitGround)
@@ -123,7 +132,7 @@ int main( int argc, char* args[] ){
                         
                         for(float rad = 0; rad < 6.28; rad += 0.02){
                             SDL_Rect bulletRect = {playerEntity->x,playerEntity->y,5,5};
-                            BulletEntity * bullet =new BulletEntity(bulletRect);
+                            BulletEntity * bullet =new BulletEntity(bulletRect,&cells);
                             bullet->vx = cos(rad + (rand() % 100)/100.0)*9;
                             bullet->vy = sin(rad + (rand() % 100)/100.0)*9;
                             
@@ -147,7 +156,7 @@ int main( int argc, char* args[] ){
         //AI
          for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
              Entity * entity =  ((Entity *)(*it));
-             entity->applyAI(entities,cells);
+             entity->applyAI(entities);
              
              if(entity->getType() != Entity::PLAYER && entity->getType() != Entity::DEFAULT &&
                 collisionDetectRIR(playerEntity->getRect(),entity->getRect())){
@@ -220,14 +229,14 @@ int main( int argc, char* args[] ){
                         //above
                         if(j <= (entityRect.y + entityRect.h/2)){
                             if(entity->vy < 0){
-                                entity->vy *= -0.1;
+                                entity->vy *= 0.1;
                                 collidedY = true;
                             }
                         }
                         else{  //below
                             
                             if(entity->vy > 0){
-                                entity->vy  *= -0.1;
+                                entity->vy  *= 0.1;
                                 entity->hitGround = true;
                                 collidedY = true;
                             }
@@ -235,19 +244,17 @@ int main( int argc, char* args[] ){
                         //left
                         if(i <= (entityRect.x + entityRect.w/2)){
                             if(entity->vx < 0){
-                                entity->vx  *= -0.1;
+                                entity->vx  *= 0.1;
                                 collidedX = true;
                             }
                         }
                         else{  //right
                             
                             if(entity->vx > 0){
-                                entity->vx  *= -0.1;
+                                entity->vx  *= 0.1;
                                 collidedX = true;
                             }
                         }
-                        entity->vx = 0;
-                        entity->vy = 0;
                         collidedY = 1;
                         collidedX = 1;
                         

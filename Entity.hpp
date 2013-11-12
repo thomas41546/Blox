@@ -21,7 +21,7 @@ class Entity{
 protected:
     bool dead;
 public:
-    enum EntityType { NPC,NPC_WORM,PLAYER,BULLET,DEFAULT};
+    enum EntityType { NPC,NPC_WORM,NPC_LINEY,PLAYER,BULLET,DEFAULT};
     
     //TODO encapsulate
     unsigned int width,height;
@@ -29,12 +29,13 @@ public:
     double x,y;
     bool hitGround;
     int id;
+    CellMatrix * cellMatrix;
     
     static bool isEntityDead(Entity * e){
         return e->isDead();
     }
     
-    Entity(SDL_Rect _dimensions);
+    Entity(SDL_Rect _dimensions,CellMatrix * _cellMatrix);
 
     SDL_Rect getRect();
     void setDead();
@@ -51,7 +52,7 @@ public:
     
     virtual void applyGravity(float mag);
     virtual void applyHorizontalDrag(float mag);
-    virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells);
+    virtual void applyAI(std::vector<Entity *> & entities);
     
     virtual void collidedWith(Entity * other);
     
@@ -59,7 +60,7 @@ public:
 
 class PlayerEntity: public Entity{
 public:
-    PlayerEntity(SDL_Rect _dimensions) : Entity(_dimensions){}
+    PlayerEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix) : Entity(_dimensions, _cellMatrix){}
     virtual EntityType getType();
     virtual void render(SDL_Surface* surface, int offsetX, int offsetY);
 };
@@ -67,21 +68,29 @@ public:
 
 class NPCEntity: public Entity{
 public:
-    NPCEntity(SDL_Rect _dimensions) : Entity(_dimensions){}
+    NPCEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix) : Entity(_dimensions, _cellMatrix){}
     virtual EntityType getType();
-    virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells);
+    virtual void applyAI(std::vector<Entity *> & entities);
     virtual void collidedWith(Entity * other);
+};
+
+class LineyEntity: public NPCEntity{
+public:
+    LineyEntity(SDL_Rect _dimensions,  CellMatrix * _cellMatrix);
+    virtual EntityType getType();
+    virtual void applyGravity(float mag);
+    virtual void applyHorizontalDrag(float mag);
+    virtual void applyAI(std::vector<Entity *> & entities);
 };
 
 class WormBodyEntity: public NPCEntity{
 public:
-    WormBodyEntity(SDL_Rect _dimensions) : NPCEntity(_dimensions){
-    }
+    WormBodyEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix) : NPCEntity(_dimensions, _cellMatrix){}
     virtual EntityType getType();
     virtual void render(SDL_Surface* surface, int offsetX, int offsetY);
     virtual void applyGravity(float mag);
     virtual void applyHorizontalDrag(float mag);
-    virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells);
+    virtual void applyAI(std::vector<Entity *> & entities);
 };
 
 class WormEntity: public NPCEntity{
@@ -91,13 +100,13 @@ private:
     WormBodyEntity * segments[WORM_LENGTH];
 
 public:
-    WormEntity(SDL_Rect _dimensions, std::vector<Entity *> & entities);
+    WormEntity(SDL_Rect _dimensions,  CellMatrix * _cellMatrix, std::vector<Entity *> & entities);
 
     virtual EntityType getType();
     virtual void render(SDL_Surface* surface, int offsetX, int offsetY);
     virtual void applyGravity(float mag);
     virtual void applyHorizontalDrag(float mag);
-    virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells);
+    virtual void applyAI(std::vector<Entity *> & entities);
     
     ~WormEntity(){
         for(int i = 0; i < WORM_LENGTH; i++){
@@ -113,12 +122,12 @@ private:
     static const unsigned int BULLET_LIFE = 500;
     
 public:
-    BulletEntity(SDL_Rect _dimensions);
+    BulletEntity(SDL_Rect _dimensions,  CellMatrix * _cellMatrix);
     virtual EntityType getType();
     virtual void render(SDL_Surface* surface, int offsetX, int offsetY);
     virtual void applyGravity(float mag);
     virtual void applyHorizontalDrag(float mag);
-    virtual void applyAI(std::vector<Entity *> & entities, CellMatrix & cells);
+    virtual void applyAI(std::vector<Entity *> & entities);
 };
 
 

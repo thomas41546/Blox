@@ -2,11 +2,12 @@
 #include "Entity.hpp"
 #include "Drawing.hpp"
 
-Entity::Entity(SDL_Rect _dimensions){
+Entity::Entity(SDL_Rect _dimensions,CellMatrix * _cellMatrix){
     x = (double)_dimensions.x;
     y = (double)_dimensions.y;
     width = _dimensions.w;
     height = _dimensions.h;
+    cellMatrix = _cellMatrix;
     vx = 0;
     vy = 0;
     hitGround = false;
@@ -52,7 +53,7 @@ void Entity::collidedWith(Entity * other){
     vx *= mag;
 }
 
- void Entity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
+ void Entity::applyAI(std::vector<Entity *> & entities){
 }
 
 
@@ -94,7 +95,7 @@ void NPCEntity::collidedWith(Entity * other){
     }
 }
 
- void NPCEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
+ void NPCEntity::applyAI(std::vector<Entity *> & entities){
     if(abs(vy) < 0.01 &&  abs(vx) < 0.01 && hitGround){
         vy -= rand()% 6 + 1;
         if(playerEntity->x < x)
@@ -108,14 +109,34 @@ void NPCEntity::collidedWith(Entity * other){
 }
 
 
- void WormBodyEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
+// LineyEntity
+LineyEntity::LineyEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix) : NPCEntity(_dimensions, _cellMatrix){
 }
 
- void WormBodyEntity::applyGravity(float mag){
+void LineyEntity::applyAI(std::vector<Entity *> & entities){
+    unsigned i = x / CellMatrix::getCellSize();
+    unsigned j = y / CellMatrix::getCellSize();
+    
+    Cell * cell = cellMatrix->getCellIndex(i,j);
+    
+    if(cell->isEdge()){
+        
+    }
 }
 
- void WormBodyEntity::applyHorizontalDrag(float mag){
+void LineyEntity::applyGravity(float mag){
 }
+
+void LineyEntity::applyHorizontalDrag(float mag){
+}
+
+Entity::EntityType LineyEntity::getType(){
+    return NPC_LINEY;
+}
+
+
+
+//WormBody
 
  void WormBodyEntity::render(SDL_Surface* surface, int offsetX, int offsetY){
     SDL_Rect rect = getRect();
@@ -124,14 +145,23 @@ void NPCEntity::collidedWith(Entity * other){
      Drawing::drawRect(rect,COLOR_BLUE);
 }
 
- Entity::EntityType WormBodyEntity::getType(){
+void WormBodyEntity::applyAI(std::vector<Entity *> & entities){
+}
+
+void WormBodyEntity::applyGravity(float mag){
+}
+
+void WormBodyEntity::applyHorizontalDrag(float mag){
+}
+
+Entity::EntityType WormBodyEntity::getType(){
     return NPC_WORM;
 }
 
 //WormEntity
-WormEntity::WormEntity(SDL_Rect _dimensions, std::vector<Entity *> & entities) : NPCEntity(_dimensions){
+WormEntity::WormEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix, std::vector<Entity *> & entities) : NPCEntity(_dimensions, _cellMatrix){
     for(int i = 0; i < WORM_LENGTH; i++){
-        segments[i] = new WormBodyEntity(_dimensions);
+        segments[i] = new WormBodyEntity(_dimensions, _cellMatrix);
         segments[i]->x = _dimensions.x - (_dimensions.w+5)*i;
         segments[i]->y = _dimensions.y;
         segments[i]->vx = 0;
@@ -140,7 +170,7 @@ WormEntity::WormEntity(SDL_Rect _dimensions, std::vector<Entity *> & entities) :
     }
 }
 
- void WormEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
+ void WormEntity::applyAI(std::vector<Entity *> & entities){
     //static double curAngle = 0;
     static double lastTargetAngle = 0;
     //static double incrementer = 0.1;
@@ -180,7 +210,7 @@ WormEntity::WormEntity(SDL_Rect _dimensions, std::vector<Entity *> & entities) :
 }
 
 //BulletEntity
-BulletEntity::BulletEntity(SDL_Rect _dimensions) : Entity(_dimensions){
+BulletEntity::BulletEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix) : Entity(_dimensions, _cellMatrix){
     lifetime = BULLET_LIFE; //x * fps
 }
 
@@ -191,7 +221,7 @@ BulletEntity::BulletEntity(SDL_Rect _dimensions) : Entity(_dimensions){
      Drawing::drawRect(rect,COLOR_GREEN);
 }
 
- void BulletEntity::applyAI(std::vector<Entity *> & entities, CellMatrix & cells){
+ void BulletEntity::applyAI(std::vector<Entity *> & entities){
     lifetime -= 1;
     if(lifetime == 0){
         setDead();
