@@ -116,7 +116,7 @@ void Window::renderStart(){
     SDL_Rect rect = getRect();
     rect.x = 0;
     rect.y = 0;
-    Drawing::drawRect(rect,COLOR_LOUNGE);
+    Drawing::drawRect(rect,COLOR_LOUNGE,2);
     glEnd();
 
     

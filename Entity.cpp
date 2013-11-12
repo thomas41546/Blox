@@ -37,7 +37,7 @@ bool Entity::isDead(){
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-    Drawing::drawRect(rect,COLOR_BLACK);
+    Drawing::drawRect(rect,COLOR_BLACK,2);
 }
 
 void Entity::collidedWith(Entity * other){
@@ -78,9 +78,9 @@ Point2d<float> Entity::getSize(){
     rect.x -= offsetX;
     rect.y -= offsetY;
     if(hitGround)
-        Drawing::drawRect(rect,COLOR_GREEN);
+        Drawing::drawRect(rect,COLOR_GREEN,2);
     else
-        Drawing::drawRect(rect,COLOR_RED);
+        Drawing::drawRect(rect,COLOR_RED,2);
 }
  Entity::EntityType PlayerEntity::getType(){
     return PLAYER;
@@ -102,9 +102,15 @@ void NPCEntity::collidedWith(Entity * other){
             vy -= rand()% 6 + 1;
         }
         if(playerEntity->x < x)
-            vx -= rand()% 5 ;
+            vx -= rand()% 5 + 2;
         else if(playerEntity->x > x)
-            vx += rand()% 5;
+            vx += rand()% 5 + 2;
+    }
+    else{
+        if(playerEntity->x < x)
+            vx -= rand()% 2 ;
+        else if(playerEntity->x > x)
+            vx += rand()% 2;
     }
 }
  Entity::EntityType NPCEntity::getType(){
@@ -144,7 +150,7 @@ Entity::EntityType LineyEntity::getType(){
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-     Drawing::drawRect(rect,COLOR_BLUE);
+     Drawing::drawRect(rect,COLOR_BLUE,2);
 }
 
 void WormBodyEntity::applyAI(std::vector<Entity *> & entities){
@@ -204,7 +210,7 @@ WormEntity::WormEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix, std::vect
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-     Drawing::drawRect(rect,COLOR_BLUE);
+     Drawing::drawRect(rect,COLOR_BLUE,2);
 }
 
  Entity::EntityType WormEntity::getType(){
@@ -220,7 +226,7 @@ BulletEntity::BulletEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix) : Ent
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-     Drawing::drawRect(rect,COLOR_GREEN);
+     Drawing::drawRect(rect,COLOR_GREEN,2);
 }
 
  void BulletEntity::applyAI(std::vector<Entity *> & entities){

@@ -80,7 +80,7 @@ int main( int argc, char* args[] ){
     SDL_Rect wormRect = {500,500,40,40};
     entities.push_back(new WormEntity(wormRect,&cells, entities));
     
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 10000; i++){
         SDL_Rect npcRect = {rand()%200 + 300,rand()%200 + 300,11,11};
         entities.push_back(new NPCEntity(npcRect,&cells));
     }

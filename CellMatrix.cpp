@@ -29,13 +29,22 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
                 0xF8DE7F,
                 0xF4ED9F,
             };
+            
             int colorChoice = 0;
+            SDL_Color color;
             
             int groundType = (int)round(getnoise * 7);
             switch(groundType){
                 case 0:
                 case 1:
                 case 2:
+                    colorChoice = colorGrad[0];
+                    
+                    color.r = colorChoice >> 16;
+                    color.g =  (colorChoice >> 8) & 0xFF;
+                    color.b = colorChoice & 0xFF;
+                    (getCellIndex(x,y))->setBaseColor(color);
+                    
                     (getCellIndex(x,y))->resetFilled();
                     break;
                     
