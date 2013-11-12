@@ -321,34 +321,34 @@ int main( int argc, char* args[] ){
             
         }
         
-        
         // target positions
         int nx,ny;
         nx = playerEntity->x - (int)mainWindow->getWidth()/2;
         ny = playerEntity->y - (int)mainWindow->getHeight()/2;
         if(nx < 0) nx = 0;
         if(ny < 0) ny = 0;
-        
-        int xpandiff = nx - mainWindow->getX();
-        if(abs(xpandiff) > 300){
-            mainWindow->setXY(mainWindow->getX() + (xpandiff > 0 ? 10 : -10),mainWindow->getY());
-        }
-        
-        int ypandiff = ny - mainWindow->getY();
-        if(abs(ypandiff) > 300){
-            mainWindow->setXY(mainWindow->getX(),mainWindow->getY() + (ypandiff > 0 ? 10 : -10));
-        }
-        
+       
+        int ox = (int)mainWindow->getWidth()/2;
+        int oy = (int)mainWindow->getHeight()/2;
 
+        int xpandiff = nx - (mainWindow->getX() );
+        xpandiff *= 2; //scale
+        if(abs(xpandiff) > 300){
+            mainWindow->setXY(mainWindow->getX() + (xpandiff > 0 ? 1 : -1)*20,mainWindow->getY());
+        }
+        
+        int ypandiff = ny - (mainWindow->getY() );
+        ypandiff *= 2; //scale
+        if(abs(ypandiff) > 300){
+            mainWindow->setXY(mainWindow->getX() ,mainWindow->getY() + 20*(ypandiff > 0 ? 1 : -1) );
+        }
+        
         //TODO zoom into main character more --> make him look more important
         mainWindow->renderStart();
         mainWindow->renderCells(cells);
         mainWindow->renderEntities(entities);
        // mainWindow->renderFont(0,0,str(boost::format("Fps/%1% Entities/%2% Cpu/%3%") % lastFps % entities.size() % getCpuUsage() ));
-        mainWindow->renderFinish();
-        
- 
-        
+        mainWindow->renderFinish(); 
         
         static unsigned int lastRenderTime = 0;
         static unsigned int curRenderTime = 0;

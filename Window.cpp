@@ -32,12 +32,11 @@ void Window::setupOpenGL(){
     // Opengl Defaults for 2D
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    glOrtho(0.f, width, height, 0.f, 1.f, 1000.f);
-    
+    glOrtho(0.f, width/2, height/2, 0.f, 1.f, 1000.f);    
+
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
-    glTranslatef(0.f, 0.f, -500.f);
-    
+    glTranslatef(-400.f, -300.f, -500.f); 
     glClearColor( 0.f,1.f,0.f, 1.f );
     
     //Setup shaders
