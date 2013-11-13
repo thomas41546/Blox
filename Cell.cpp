@@ -14,6 +14,7 @@ Cell::Cell(){
     is_breakable = true;
     is_filled = false;
     is_edge = false;
+    is_grass = false;
     slope = NONE;
 }
 
@@ -29,6 +30,17 @@ bool Cell::destroy(){
     return true;
 }
 
+void Cell::setGrass(){
+    is_grass = true;
+}
+
+void Cell::resetGrass(){
+    is_grass = false;
+}
+
+bool Cell::isGrass(){
+    return is_grass;
+}
 
 void Cell::setEdge(){
     is_edge = true;
@@ -40,7 +52,6 @@ void Cell::resetEdge(){
 bool Cell::isEdge(){
     return is_edge;
 }
-
 
 void Cell::setFilled(){
     is_filled = true;
@@ -83,6 +94,9 @@ void Cell::render(Double_Rect & rect){
     else if( slope == RIGHT){
         Drawing::drawRightTriangleRight(rect,base_color);
     }*/
+    if(is_grass){
+        Drawing::drawRect(rect,COLOR_GREEN);
+    }
     
     if(is_edge){
         //Drawing::drawRect(rect,COLOR_RED);

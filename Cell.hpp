@@ -19,6 +19,7 @@ private:
     bool is_breakable;
     
     bool is_edge;
+    bool is_grass;
     SlopeType slope;
     
     CellMatrix * cellMatrix;
@@ -34,6 +35,10 @@ public:
     void setSlope(SlopeType _slope);
     SlopeType getSlope();
     void resetSlope();
+    
+    void setGrass();
+    void resetGrass();
+    bool isGrass();
     
     void setEdge();
     void resetEdge();

@@ -33,8 +33,10 @@ public:
     unsigned int getWidth ();
     unsigned int getHeight ();
     
+    void performCalcs(int i, int j);
     void calcSlopes(int i, int j);
     void calcEdges(int i, int j);
+    void calcGrass(int i, int j);
     
     bool destroyCellByPixel(int i, int j);
     

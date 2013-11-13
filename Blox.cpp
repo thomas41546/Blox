@@ -73,7 +73,7 @@ int main( int argc, char* args[] ){
     //boost::thread t(boost::bind(&render_flip));
     //windowFlipThread = &t;
     
-    SDL_Rect playerRect = {500,500,10,20};
+    SDL_Rect playerRect = {100,100,10,20};
     playerEntity = new PlayerEntity(playerRect, &cells);
     entities.push_back((Entity *)playerEntity);
     

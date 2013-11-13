@@ -29,6 +29,7 @@ Window::Window (double _x,double _y, int _width, int _height, int _maxScrollWidt
 void Window::setupOpenGL(){
     //Load Textures
     textures["block"] = Drawing::loadTexture("dirt1.jpg");
+    textures["grass"] = Drawing::loadTexture("grass.jpg");
     
     // Opengl Defaults for 2D
     glMatrixMode( GL_PROJECTION );
@@ -40,26 +41,52 @@ void Window::setupOpenGL(){
     glTranslatef(0.f, 0.f, -500.f);
     glClearColor( 0.f,1.f,0.f, 1.f );
     
+
+    
     //Setup shaders
+    
+    
     const GLchar *vertex_shader[] ={
         "void main(void) {\n",
         "    gl_Position = ftransform();\n",
-        "gl_FrontColor = gl_Color;\n",
+        "    gl_FrontColor = gl_Color;\n",
         "    gl_TexCoord[0] =  gl_MultiTexCoord0;\n",
-        "   gl_TexCoord[1] = gl_MultiTexCoord1;\n",
+        "    gl_TexCoord[1] = gl_MultiTexCoord1;\n",
         "}"};
     
     const GLchar *fragment_shader[] = {
         "uniform sampler2D myTexture1;",
+        "uniform sampler2D myTexture2;",
         "void main() {\n",
         "      vec4 texval1 = texture2D(myTexture1, vec2(gl_TexCoord[0]));",
         "       gl_FragColor = mix(texval1,gl_Color,0.75);",
         "}"
     };
+    
     static ShaderLoader prog(vertex_shader, fragment_shader);
-    prog();     
+    //prog();
+    
+    glEnable (GL_BLEND);
+    //glBlendFunc (GL_ONE, GL_ONE);
+    
+    glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
+    glShadeModel(GL_SMOOTH);
+
+    glEnable (GL_LIGHT0);
+    GLfloat lightPos[]={(float)getWidth()/2/getZoom(),(float)getHeight()/2/getZoom(),600.f,1.0}; // increase the distance in z to make it brighter
+    glLightfv(GL_LIGHT0,GL_POSITION,lightPos);
+    GLfloat spotDir[]={0.0,0.0,-1.0}; 
+    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spotDir);
+    glLighti(GL_LIGHT0, GL_SPOT_CUTOFF, 80);
+    glLighti(GL_LIGHT0, GL_SPOT_EXPONENT, 80);
+    GLfloat light_color[] = { 1.f, 1.f, 1.f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_color);
+
     GLenum error = glGetError();
     assert(error == GL_NO_ERROR);
+    
+    
 }
 
 
@@ -111,24 +138,21 @@ void Window::setXY(double _x, double  _y){
 void Window::renderStart(){
     
     glClear( GL_COLOR_BUFFER_BIT );
-    glDisable(GL_TEXTURE_2D);
+
     glBegin( GL_QUADS );
     Double_Rect rect = getRect();
     rect.x = 0;
     rect.y = 0;
     Drawing::drawRect(rect,COLOR_LOUNGE);
     glEnd();
-
-    
-    glEnable( GL_TEXTURE_2D );
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,GL_MODULATE);//GL_MODULATE
-    glBindTexture( GL_TEXTURE_2D, textures["block"] );
-    glBegin( GL_QUADS );
     
 };
 
 void Window::renderCells(CellMatrix & cells){
     
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+    glEnable( GL_TEXTURE_2D );
+    glBindTexture( GL_TEXTURE_2D, textures["block"] );
     
     unsigned int cellSize = CellMatrix::getCellSize();
     
@@ -137,8 +161,8 @@ void Window::renderCells(CellMatrix & cells){
     double start_i = getX();
     double start_j = getY();
     
-    double end_i = getX() + getWidth();
-    double end_j = getY() + getHeight();
+    double end_i = getX() + getWidth()/zoom;
+    double end_j = getY() + getHeight()/zoom;
     
     for(j = start_j; j < end_j; j+= cellSize){
         for(i = start_i; i < end_i; i+=cellSize){
@@ -153,6 +177,8 @@ void Window::renderCells(CellMatrix & cells){
             }
         }
     }
+    glBindTexture( GL_TEXTURE_2D, NULL );
+    glDisable(GL_TEXTURE_2D);
 };
 
 void Window::renderEntities(std::vector<Entity *> entities){
@@ -162,7 +188,6 @@ void Window::renderEntities(std::vector<Entity *> entities){
 };
 
 void Window::renderFinish(){
-   glEnd();
    glFlush();
    glDisable(GL_TEXTURE_2D);
    SDL_GL_SwapBuffers();

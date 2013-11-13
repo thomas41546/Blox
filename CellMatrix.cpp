@@ -64,8 +64,8 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
             
         }
     }
-    for(y = 45; y < 55; y++){
-        for(x = 45; x < 55; x++){
+    for(y = 0; y < 14; y++){
+        for(x = 0; x < 14; x++){
             (getCellIndex(x,y))->resetFilled();
         }
     }
@@ -75,18 +75,21 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
     unsigned i,j;
     for(j = 1; j < height - 1; j++){
         for(i = 1; i < width - 1; i++){
-            calcSlopes(i,j);
-            calcEdges(i,j);
+            performCalcs(i,j);
         }
     }
     
 }
 
-void CellMatrix::calcEdges(int i, int j){
+void CellMatrix::performCalcs(int i, int j){
     if(i <= 1 || i >= (int)width -1)return;
     if(j <= 1 || j >= (int)height -1)return;
-    
-    
+    calcSlopes(i,j);
+    calcEdges(i,j);
+    calcGrass(i,j);
+}
+
+void CellMatrix::calcEdges(int i, int j){
     (getCellIndex(i,j))->resetEdge();
     if(!(getCellIndex(i,j))->isFilled()){
         for(int oy = -1; oy <= 1; oy++){
@@ -94,16 +97,37 @@ void CellMatrix::calcEdges(int i, int j){
                 if(ox == 0 && oy == 0) continue;
                 if((getCellIndex(i+ox,j+oy))->isFilled()){
                     (getCellIndex(i,j))->setEdge();
-                    return;
                 }
             }
         }
     }
 }
+void CellMatrix::calcGrass(int i, int j){
+
+    // set grass
+    (getCellIndex(i,j))->resetGrass();
+    if((getCellIndex(i,j))->isEdge()){
+        int bottomCount = 0;
+        for(int ox = -1; ox <= 1; ox++){
+            if((getCellIndex(i+ox,j+1))->isFilled())
+                bottomCount++;
+        }
+        int totalCount = 0;
+        for(int oy = -1; oy <= 1; oy++){
+            for(int ox = -1; ox <= 1; ox++){
+                if(ox == 0 && oy == 0) continue;
+                if((getCellIndex(i+ox,j+oy))->isFilled()){
+                    totalCount++;
+                }
+            }
+        }
+        if(totalCount == bottomCount && bottomCount == 3){
+            (getCellIndex(i,j))->setGrass();
+        }
+    }
+}
 
 void CellMatrix::calcSlopes(int i, int j){
-    if(i <= 1 || i >= (int)width -1)return;
-    if(j <= 1 || j >= (int)height -1)return;
     
     (getCellIndex(i,j))->resetSlope();
     if(!(getCellIndex(i,j))->isFilled()){
@@ -135,8 +159,7 @@ bool CellMatrix::destroyCellByPixel(int i, int j){
     if(cell->destroy()){
         for(int ix = -1; ix <= 1; ix++)
             for(int iy = -1; iy <= 1; iy++){
-                calcEdges(i/CellMatrix::getCellSize() + ix, j/CellMatrix::getCellSize() + iy);
-                calcSlopes(i/CellMatrix::getCellSize() + ix, j/CellMatrix::getCellSize() + iy);
+                performCalcs(i/CellMatrix::getCellSize() + ix, j/CellMatrix::getCellSize() + iy);
             }
         
         return true;
