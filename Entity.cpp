@@ -37,7 +37,7 @@ bool Entity::isDead(){
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-    Drawing::drawRect(rect,COLOR_BLACK,2);
+    Drawing::drawRect(rect,COLOR_BLACK);
 }
 
 void Entity::collidedWith(Entity * other){
@@ -78,9 +78,9 @@ Point2d<float> Entity::getSize(){
     rect.x -= offsetX;
     rect.y -= offsetY;
     if(hitGround)
-        Drawing::drawRect(rect,COLOR_GREEN,2);
+        Drawing::drawRect(rect,COLOR_GREEN);
     else
-        Drawing::drawRect(rect,COLOR_RED,2);
+        Drawing::drawRect(rect,COLOR_RED);
 }
  Entity::EntityType PlayerEntity::getType(){
     return PLAYER;
@@ -150,7 +150,7 @@ Entity::EntityType LineyEntity::getType(){
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-     Drawing::drawRect(rect,COLOR_BLUE,2);
+     Drawing::drawRect(rect,COLOR_BLUE);
 }
 
 void WormBodyEntity::applyAI(std::vector<Entity *> & entities){
@@ -210,7 +210,7 @@ WormEntity::WormEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix, std::vect
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-     Drawing::drawRect(rect,COLOR_BLUE,2);
+     Drawing::drawRect(rect,COLOR_BLUE);
 }
 
  Entity::EntityType WormEntity::getType(){
@@ -226,7 +226,7 @@ BulletEntity::BulletEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix) : Ent
     SDL_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
-     Drawing::drawRect(rect,COLOR_GREEN,2);
+     Drawing::drawRect(rect,COLOR_GREEN);
 }
 
  void BulletEntity::applyAI(std::vector<Entity *> & entities){

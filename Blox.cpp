@@ -73,14 +73,14 @@ int main( int argc, char* args[] ){
     //boost::thread t(boost::bind(&render_flip));
     //windowFlipThread = &t;
     
-    SDL_Rect playerRect = {500,500,20,20};
+    SDL_Rect playerRect = {500,500,10,20};
     playerEntity = new PlayerEntity(playerRect, &cells);
     entities.push_back((Entity *)playerEntity);
     
     SDL_Rect wormRect = {500,500,40,40};
     entities.push_back(new WormEntity(wormRect,&cells, entities));
     
-    for(int i = 0; i < 10000; i++){
+    for(int i = 0; i < 20; i++){
         SDL_Rect npcRect = {rand()%200 + 300,rand()%200 + 300,11,11};
         entities.push_back(new NPCEntity(npcRect,&cells));
     }
@@ -234,7 +234,7 @@ int main( int argc, char* args[] ){
                 
                 
                 //slope stuff
-                
+                /*
                 int oldY = entity->y;
 
                 startIndexJ = MIN(entity->y,entity->y) / CellMatrix::getCellSize();
@@ -271,7 +271,7 @@ int main( int argc, char* args[] ){
                     }
                 }
                 continue;
-                
+                */
 
             }
             else{
@@ -320,30 +320,18 @@ int main( int argc, char* args[] ){
             //nothing
             
         }
-        
-        // target positions
-        int nx,ny;
-        nx = playerEntity->x - (int)mainWindow->getWidth()/2;
-        ny = playerEntity->y - (int)mainWindow->getHeight()/2;
-        if(nx < 0) nx = 0;
-        if(ny < 0) ny = 0;
-       
-        int ox = (int)mainWindow->getWidth()/2;
-        int oy = (int)mainWindow->getHeight()/2;
-
-        int xpandiff = nx - (mainWindow->getX() );
-        xpandiff *= 2; //scale
-        if(abs(xpandiff) > 300){
-            mainWindow->setXY(mainWindow->getX() + (xpandiff > 0 ? 1 : -1)*20,mainWindow->getY());
+        if( mainWindow->getX() + mainWindow->getWidth()/mainWindow->getZoom() < playerEntity->x + playerEntity->width + CellMatrix::getCellSize()*6)
+            mainWindow->setXY(playerEntity->x + playerEntity->width + CellMatrix::getCellSize()*6 - mainWindow->getWidth()/mainWindow->getZoom(), mainWindow->getY());
+        else if(mainWindow->getX() > playerEntity->x  - CellMatrix::getCellSize()*6){
+            mainWindow->setXY( playerEntity->x  - CellMatrix::getCellSize()*6, mainWindow->getY());
         }
         
-        int ypandiff = ny - (mainWindow->getY() );
-        ypandiff *= 2; //scale
-        if(abs(ypandiff) > 300){
-            mainWindow->setXY(mainWindow->getX() ,mainWindow->getY() + 20*(ypandiff > 0 ? 1 : -1) );
-        }
+        if( mainWindow->getY() + mainWindow->getHeight()/mainWindow->getZoom() < playerEntity->y + playerEntity->height + CellMatrix::getCellSize()*4)
+            mainWindow->setXY(mainWindow->getX(), playerEntity->y + playerEntity->height + CellMatrix::getCellSize()*4 - mainWindow->getHeight()/mainWindow->getZoom() );
+        else if( mainWindow->getY() > playerEntity->y - CellMatrix::getCellSize()*4)
+            mainWindow->setXY( mainWindow->getX(), playerEntity->y  - CellMatrix::getCellSize()*4);
         
-        //TODO zoom into main character more --> make him look more important
+        
         mainWindow->renderStart();
         mainWindow->renderCells(cells);
         mainWindow->renderEntities(entities);

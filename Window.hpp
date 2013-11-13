@@ -20,8 +20,9 @@
 
 class Window {
 private:
-    unsigned int x;
-    unsigned int y;
+    double x;
+    double y;
+    unsigned int zoom;
     
     unsigned int width;
     unsigned int height;
@@ -42,10 +43,11 @@ private:
     
     
 public:
-    Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight);
+    Window (double _x,double _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight);
     
-    unsigned int getX();
-    unsigned int getY();
+    double getX();
+    double getY();
+    unsigned int getZoom();
     
     unsigned int getWidth ();
     unsigned int getHeight ();
@@ -56,7 +58,7 @@ public:
     
     void scrollVertically(int amount);
     
-    void setXY(unsigned int _x, unsigned int _y);
+    void setXY(double _x, double  _y);
     void renderStart();
     void renderFont(int ox, int oy, std::string text);
     void renderCells(CellMatrix & cells);

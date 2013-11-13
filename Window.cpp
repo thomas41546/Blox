@@ -5,9 +5,10 @@
 #include "Drawing.hpp"
 #include "ShaderLoader.hpp"
 
-Window::Window (int _x,int _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight){
+Window::Window (double _x,double _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight){
     x = _x;
     y = _y;
+    zoom = 4;
     width = _width;
     height = _height;
     maxScrollWidth = _maxScrollWidth;
@@ -32,11 +33,11 @@ void Window::setupOpenGL(){
     // Opengl Defaults for 2D
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    glOrtho(0.f, width/2, height/2, 0.f, 1.f, 1000.f);    
+    glOrtho(0.f, ((float)width)/zoom, ((float)height)/zoom, 0.f, 1.f, 1000.f);
 
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
-    glTranslatef(-400.f, -300.f, -500.f); 
+    glTranslatef(0.f, 0.f, -500.f);
     glClearColor( 0.f,1.f,0.f, 1.f );
     
     //Setup shaders
@@ -63,8 +64,9 @@ void Window::setupOpenGL(){
 }
 
 
-unsigned int Window::getX () {return x;}
-unsigned int Window::getY () {return y;}
+double Window::getX () {return x;}
+double Window::getY () {return y;}
+unsigned int Window::getZoom () {return zoom;}
 
 unsigned int Window::getWidth () {return width;}
 unsigned int Window::getHeight () {return height;}
@@ -99,9 +101,10 @@ void  Window::scrollVertically(int amount) {
         y += amount;
 };
 
-void Window::setXY(unsigned int _x, unsigned int _y){
-    x = _x;
-    y = _y;
+void Window::setXY(double _x, double  _y){
+    //TODO fix jitter
+    x = round(_x/CellMatrix::getCellSize())*CellMatrix::getCellSize();
+    y = round(_y/CellMatrix::getCellSize())*CellMatrix::getCellSize();
 };
 
 void Window::renderStart(){
@@ -115,7 +118,7 @@ void Window::renderStart(){
     SDL_Rect rect = getRect();
     rect.x = 0;
     rect.y = 0;
-    Drawing::drawRect(rect,COLOR_LOUNGE,2);
+    Drawing::drawRect(rect,COLOR_LOUNGE);
     glEnd();
 
     
