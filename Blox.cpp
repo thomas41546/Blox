@@ -99,6 +99,8 @@ int main( int argc, char* args[] ){
     int lastFps = 0;
     unsigned int lastTime = SDL_GetTicks();
     
+    bool lastPressLeft = false;
+    
 	while(is_game){
         unsigned int curTime = SDL_GetTicks();
         if(curTime - lastTime >= 1000){
@@ -110,6 +112,7 @@ int main( int argc, char* args[] ){
             fps += 1;
         }
         
+
 		SDL_Event event;
 		while ( SDL_PollEvent(&event) ) {
 			switch (event.type) {
@@ -117,9 +120,11 @@ int main( int argc, char* args[] ){
                     if(event.key.keysym.sym == SDLK_q)
                         is_game = 0;
                     else if(event.key.keysym.sym == SDLK_LEFT){
+                            lastPressLeft = true;
                             playerEntity->vx = -2;
                     }
                     else if(event.key.keysym.sym == SDLK_RIGHT){
+                            lastPressLeft = false;
                             playerEntity->vx = 2;
                     }
                     
@@ -131,12 +136,21 @@ int main( int argc, char* args[] ){
                     }
                     else if(event.key.keysym.sym == SDLK_SPACE){
                         
- 
-                        for(float rad = 0; rad < 6.28; rad += 0.02){
+                        float radStart,radEnd;
+                        if(lastPressLeft){
+                            radStart = 3.00;
+                            radEnd = 3.28;
+                        }
+                        else{
+                            radStart = -0.14;
+                            radEnd = 0.14;
+                        }
+                        
+                        for(float rad = radStart; rad < radEnd; rad += 0.02){
                             SDL_Rect bulletRect = {playerEntity->x,playerEntity->y,5,5};
                             BulletEntity * bullet =new BulletEntity(bulletRect,&cells);
-                            bullet->vx = cos(rad + (rand() % 100)/100.0)*9;
-                            bullet->vy = sin(rad + (rand() % 100)/100.0)*9;
+                            bullet->vx = cos(rad)*9;
+                            bullet->vy = sin(rad)*9;
                             entities.push_back(bullet);
                         }
                         
