@@ -37,7 +37,7 @@ public:
     
     Entity(SDL_Rect _dimensions,CellMatrix * _cellMatrix);
 
-    SDL_Rect getRect();
+    Double_Rect getRect();
     void setDead();
     bool isDead();
     

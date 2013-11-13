@@ -6,7 +6,7 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
     height = _height;
     matrix = new Cell[width*height]();
     
-    Perlin noiseGen(2,50,9,0);
+    Perlin noiseGen(2,60,10,0); //(smoothness, compression, variance)
     
     unsigned x,y;
     for(y = 0; y < height; y++){
@@ -64,11 +64,12 @@ CellMatrix::CellMatrix(unsigned int _width, unsigned int _height){
             
         }
     }
-    for(y = 40; y < 60; y++){
-        for(x = 40; x < 60; x++){
+    for(y = 45; y < 55; y++){
+        for(x = 45; x < 55; x++){
             (getCellIndex(x,y))->resetFilled();
         }
     }
+    
     
     
     unsigned i,j;

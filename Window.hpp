@@ -52,7 +52,7 @@ public:
     unsigned int getWidth ();
     unsigned int getHeight ();
     
-    SDL_Rect getRect();
+    Double_Rect getRect();
     
     void scrollHorizonally(int amount);
     
@@ -60,7 +60,6 @@ public:
     
     void setXY(double _x, double  _y);
     void renderStart();
-    void renderFont(int ox, int oy, std::string text);
     void renderCells(CellMatrix & cells);
     void renderEntities(std::vector<Entity *> entities);
     void renderFinish();

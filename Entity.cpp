@@ -17,8 +17,8 @@ Entity::Entity(SDL_Rect _dimensions,CellMatrix * _cellMatrix){
     id = ++nextid;
 };
 
-SDL_Rect Entity::getRect(){
-    SDL_Rect rect = {(unsigned int)x, (unsigned int)y, width,height};
+Double_Rect Entity::getRect(){
+    Double_Rect rect = {x, y, width,height};
     return rect;
 }
 
@@ -34,7 +34,7 @@ bool Entity::isDead(){
 }
 
  void Entity::render(SDL_Surface* surface, int offsetX, int offsetY){
-    SDL_Rect rect = getRect();
+    Double_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
     Drawing::drawRect(rect,COLOR_BLACK);
@@ -45,7 +45,7 @@ void Entity::collidedWith(Entity * other){
 }
 
  void Entity::applyGravity(float mag){
-    if(!hitGround)
+    if(hitGround != 4)
         vy += mag;
 }
 
@@ -74,7 +74,7 @@ Point2d<float> Entity::getSize(){
 // PlayerEntity
 
  void PlayerEntity::render(SDL_Surface* surface, int offsetX, int offsetY){
-    SDL_Rect rect = getRect();
+    Double_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
     if(hitGround)
@@ -147,7 +147,7 @@ Entity::EntityType LineyEntity::getType(){
 //WormBody
 
  void WormBodyEntity::render(SDL_Surface* surface, int offsetX, int offsetY){
-    SDL_Rect rect = getRect();
+    Double_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
      Drawing::drawRect(rect,COLOR_BLUE);
@@ -207,7 +207,7 @@ WormEntity::WormEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix, std::vect
 }
 
  void WormEntity::render(SDL_Surface* surface, int offsetX, int offsetY){
-    SDL_Rect rect = getRect();
+    Double_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
      Drawing::drawRect(rect,COLOR_BLUE);
@@ -223,7 +223,7 @@ BulletEntity::BulletEntity(SDL_Rect _dimensions, CellMatrix * _cellMatrix) : Ent
 }
 
  void BulletEntity::render(SDL_Surface* surface, int offsetX, int offsetY){
-    SDL_Rect rect = getRect();
+    Double_Rect rect = getRect();
     rect.x -= offsetX;
     rect.y -= offsetY;
      Drawing::drawRect(rect,COLOR_GREEN);

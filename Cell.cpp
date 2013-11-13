@@ -72,17 +72,17 @@ void Cell::setBaseColor(SDL_Color _baseColor){
     base_color = _baseColor;
 }
 
-void Cell::render(SDL_Rect & rect){
+void Cell::render(Double_Rect & rect){
     
     if(is_filled){
         Drawing::drawRect(rect,base_color);
     }
-    else if( slope == LEFT){
+    /*else if( slope == LEFT){
         Drawing::drawRightTriangleLeft(rect,base_color);
     }
     else if( slope == RIGHT){
         Drawing::drawRightTriangleRight(rect,base_color);
-    }
+    }*/
     
     if(is_edge){
         //Drawing::drawRect(rect,COLOR_RED);

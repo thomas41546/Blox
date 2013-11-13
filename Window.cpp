@@ -74,8 +74,8 @@ unsigned int Window::getHeight () {return height;}
 SDL_Surface* Window::getSurface () {return surface;}
 
 
-SDL_Rect Window::getRect(){
-    SDL_Rect rect = {x,y,width,height};
+Double_Rect Window::getRect(){
+    Double_Rect rect = {x,y,width,height};
     return rect;
 }
 
@@ -103,19 +103,18 @@ void  Window::scrollVertically(int amount) {
 
 void Window::setXY(double _x, double  _y){
     //TODO fix jitter
-    x = round(_x/CellMatrix::getCellSize())*CellMatrix::getCellSize();
-    y = round(_y/CellMatrix::getCellSize())*CellMatrix::getCellSize();
+    x = _x;
+    y = _y;
+    //x = round(_x/CellMatrix::getCellSize())*CellMatrix::getCellSize();
+    //y = round(_y/CellMatrix::getCellSize())*CellMatrix::getCellSize();
 };
 
 void Window::renderStart(){
-    //blank
-    //SDL_Rect rect = {0,0,getWidth(), getHeight()};
-    //SDL_FillRect(getSurface(), &rect, COLOR_WHITE);
     
     glClear( GL_COLOR_BUFFER_BIT );
     glDisable(GL_TEXTURE_2D);
     glBegin( GL_QUADS );
-    SDL_Rect rect = getRect();
+    Double_Rect rect = getRect();
     rect.x = 0;
     rect.y = 0;
     Drawing::drawRect(rect,COLOR_LOUNGE);
@@ -129,21 +128,6 @@ void Window::renderStart(){
     
 };
 
-void Window::renderFont(int ox, int oy, std::string text){
-    
-    
-    SDL_Color statColor = {0,255,0,255};
-    SDL_Color blackColor = {0,0,0,255};
-    SDL_Surface* message = TTF_RenderText_Shaded(font, text.c_str(), statColor,blackColor );
-    assert(message != NULL);
-    
-    SDL_Rect offset = {ox,oy,0,0};
-    
-    SDL_BlitSurface( message, NULL, getSurface(), &offset );
-    
-    SDL_FreeSurface(message);
-};
-
 void Window::renderCells(CellMatrix & cells){
     
     
@@ -151,16 +135,16 @@ void Window::renderCells(CellMatrix & cells){
     
     unsigned int i,j;
     
-    unsigned int start_i = getX();
-    unsigned int start_j = getY();
+    double start_i = getX();
+    double start_j = getY();
     
-    unsigned int end_i = getX() + getWidth();
-    unsigned int end_j = getY() + getHeight();
+    double end_i = getX() + getWidth();
+    double end_j = getY() + getHeight();
     
     for(j = start_j; j < end_j; j+= cellSize){
         for(i = start_i; i < end_i; i+=cellSize){
             
-            SDL_Rect rect = {(i - start_i),
+            Double_Rect rect = {(i - start_i),
                 (j - start_j),
                 cellSize,
                 cellSize};

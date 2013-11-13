@@ -44,7 +44,7 @@ public:
     bool isFilled();
     
     void setBaseColor(SDL_Color _baseColor);
-    void render(SDL_Rect & rect);
+    void render(Double_Rect & rect);
     
     
 };

@@ -18,7 +18,7 @@ boost::thread * windowFlipThread;
 // TODO abstract out to EntityManager
 static std::vector<Entity *> entities;
 
-int collisionDetectRIR(SDL_Rect box1, SDL_Rect box2)
+int collisionDetectRIR(Double_Rect box1, Double_Rect box2)
 {
     int returnValue = 0;
     if((box2.x>box1.x)&&((box1.x+box1.w)>box2.x))returnValue |= 1;
@@ -125,21 +125,40 @@ int main( int argc, char* args[] ){
                     
                     else if(event.key.keysym.sym == SDLK_UP){
                         if(playerEntity->hitGround == 4){
-                            playerEntity->vy = -5;
+                            playerEntity->vy = -3;
                             playerEntity->hitGround = 0;
                         }
                     }
                     else if(event.key.keysym.sym == SDLK_SPACE){
                         
+ 
                         for(float rad = 0; rad < 6.28; rad += 0.02){
                             SDL_Rect bulletRect = {playerEntity->x,playerEntity->y,5,5};
                             BulletEntity * bullet =new BulletEntity(bulletRect,&cells);
                             bullet->vx = cos(rad + (rand() % 100)/100.0)*9;
                             bullet->vy = sin(rad + (rand() % 100)/100.0)*9;
-                            
                             entities.push_back(bullet);
                         }
                         
+                    }
+                    break;
+                    
+                case SDL_MOUSEBUTTONDOWN:
+                    {
+                        if(event.button.button == SDL_BUTTON_LEFT)
+                        {
+                            int mx,my;
+                            SDL_GetMouseState(&mx,&my);
+                            
+                            double angle = atan2 (my - (int)mainWindow->getHeight()/2/mainWindow->getZoom() ,mx - (int)mainWindow->getWidth()/2/mainWindow->getZoom());
+                            
+                            SDL_Rect bulletRect = {playerEntity->x,playerEntity->y,5,5};
+                            BulletEntity * bullet =new BulletEntity(bulletRect,&cells);
+                            bullet->vx = cos(angle)*9;
+                            bullet->vy = sin(angle)*9;
+                            entities.push_back(bullet);
+                            
+                        }
                     }
                         
                     break;
@@ -170,7 +189,7 @@ int main( int argc, char* args[] ){
             Entity * entity =  ((Entity *)(*it));
             
             entity->applyGravity(0.1);
-            entity->applyHorizontalDrag(0.9);
+            entity->applyHorizontalDrag(0.95);
             
             if(entity->vy > MAX_VELOCITY) entity->vy = MAX_VELOCITY;
             else if(entity->vy < -1*MAX_VELOCITY) entity->vy = -1*MAX_VELOCITY;
@@ -276,7 +295,7 @@ int main( int argc, char* args[] ){
             }
             else{
                 
-                SDL_Rect entityRect;
+                Double_Rect entityRect;
                 entityRect = entity->getRect();
                 entityRect.y += entity->vy;
                 entityRect.x += entity->vx;
@@ -320,6 +339,12 @@ int main( int argc, char* args[] ){
             //nothing
             
         }
+        int nx,ny;
+        nx = playerEntity->x - (int)mainWindow->getWidth()/2/mainWindow->getZoom();
+        ny = playerEntity->y - (int)mainWindow->getHeight()/2/mainWindow->getZoom();
+        if(nx < 0) nx = 0;
+        if(ny < 0) ny = 0;
+        /*
         if( mainWindow->getX() + mainWindow->getWidth()/mainWindow->getZoom() < playerEntity->x + playerEntity->width + CellMatrix::getCellSize()*6)
             mainWindow->setXY(playerEntity->x + playerEntity->width + CellMatrix::getCellSize()*6 - mainWindow->getWidth()/mainWindow->getZoom(), mainWindow->getY());
         else if(mainWindow->getX() > playerEntity->x  - CellMatrix::getCellSize()*6){
@@ -330,7 +355,8 @@ int main( int argc, char* args[] ){
             mainWindow->setXY(mainWindow->getX(), playerEntity->y + playerEntity->height + CellMatrix::getCellSize()*4 - mainWindow->getHeight()/mainWindow->getZoom() );
         else if( mainWindow->getY() > playerEntity->y - CellMatrix::getCellSize()*4)
             mainWindow->setXY( mainWindow->getX(), playerEntity->y  - CellMatrix::getCellSize()*4);
-        
+        */
+        mainWindow->setXY(nx,ny);
         
         mainWindow->renderStart();
         mainWindow->renderCells(cells);

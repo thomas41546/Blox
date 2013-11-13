@@ -26,4 +26,8 @@ const double MATH_PI = 3.14159;
 #define MIN(a, b) ((a < b) ? a : b)
 #define MAX(a, b) ((a > b) ? a : b)
 
+typedef struct Double_Rect {
+    double x,y,w,h;
+} Double_Rect;
+
 #endif
