@@ -8,7 +8,7 @@
 Window::Window (double _x,double _y, int _width, int _height, int _maxScrollWidth, int _maxScrollHeight){
     x = _x;
     y = _y;
-    zoom = 4;
+    zoom = 4; //TOOD fix zoom must be a multiple of 2
     width = _width;
     height = _height;
     maxScrollWidth = _maxScrollWidth;

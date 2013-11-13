@@ -73,7 +73,7 @@ int main( int argc, char* args[] ){
     //boost::thread t(boost::bind(&render_flip));
     //windowFlipThread = &t;
     
-    SDL_Rect playerRect = {100,100,10,20};
+    SDL_Rect playerRect = {50,50,10,20};
     playerEntity = new PlayerEntity(playerRect, &cells);
     entities.push_back((Entity *)playerEntity);
     
@@ -121,11 +121,11 @@ int main( int argc, char* args[] ){
                         is_game = 0;
                     else if(event.key.keysym.sym == SDLK_LEFT){
                             lastPressLeft = true;
-                            playerEntity->vx = -2;
+                            playerEntity->vx = -1*0.5;
                     }
                     else if(event.key.keysym.sym == SDLK_RIGHT){
                             lastPressLeft = false;
-                            playerEntity->vx = 2;
+                            playerEntity->vx = 0.5;
                     }
                     
                     else if(event.key.keysym.sym == SDLK_UP){
@@ -200,6 +200,9 @@ int main( int argc, char* args[] ){
         
         //physics
         for (std::vector<Entity *>::iterator it = entities.begin() ; it != entities.end(); ++it){
+            
+            //TODO move entity if stuck in a block
+            
             Entity * entity =  ((Entity *)(*it));
             
             entity->applyGravity(0.1);
@@ -210,6 +213,7 @@ int main( int argc, char* args[] ){
             
             if(entity->vx > MAX_VELOCITY) entity->vx = MAX_VELOCITY;
             else if(entity->vx < -1*MAX_VELOCITY) entity->vx = -1*MAX_VELOCITY;
+
             
             bool collidedY = false;
             bool collidedX = false;
@@ -263,6 +267,12 @@ int main( int argc, char* args[] ){
                 }
                 else{
                     entity->x += entity->vx;
+                }
+                
+                
+                if(entity->getType() == Entity::PLAYER && std::abs(entity->vy) < 0.01 && std::abs(entity->vx) < 0.01 && collidedX && collidedY){
+                       printf("x/%2.4f py/%2.4f colx/%d coly/%d\n",playerEntity->vx,playerEntity->vy,collidedX,collidedY);
+                    //TODO unstuck player - FIX
                 }
                 
                 
@@ -346,13 +356,16 @@ int main( int argc, char* args[] ){
                 entity->x += entity->vx;
                 entity->y += entity->vy;
             }
-            
+            if(entity->x < 0) entity->x = 0;
+            if(entity->y < 0) entity->y = 0;
             
             NEXT_ENTITY:
             continue;
             //nothing
             
         }
+        //printf("px/%2.4f py/%2.4f\n",playerEntity->x,playerEntity->y);
+        
         int nx,ny;
         nx = playerEntity->x - (int)mainWindow->getWidth()/2/mainWindow->getZoom();
         ny = playerEntity->y - (int)mainWindow->getHeight()/2/mainWindow->getZoom();
