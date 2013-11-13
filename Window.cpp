@@ -28,7 +28,7 @@ Window::Window (double _x,double _y, int _width, int _height, int _maxScrollWidt
 
 void Window::setupOpenGL(){
     //Load Textures
-    textures["block"] = Drawing::loadTexture("dirty1.png");
+    textures["block"] = Drawing::loadTexture("dirt1.jpg");
     
     // Opengl Defaults for 2D
     glMatrixMode( GL_PROJECTION );
@@ -53,12 +53,11 @@ void Window::setupOpenGL(){
         "uniform sampler2D myTexture1;",
         "void main() {\n",
         "      vec4 texval1 = texture2D(myTexture1, vec2(gl_TexCoord[0]));",
-        "       gl_FragColor = normalize(texval1 + gl_Color);",
+        "       gl_FragColor = mix(texval1,gl_Color,0.75);",
         "}"
     };
     static ShaderLoader prog(vertex_shader, fragment_shader);
-    //prog(); TODO fix fragment_shader
-    
+    prog();     
     GLenum error = glGetError();
     assert(error == GL_NO_ERROR);
 }

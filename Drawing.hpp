@@ -48,22 +48,25 @@ public:
     
     static GLuint loadTexture(const char * file_name)
     {
-        SDL_Surface* surface = IMG_Load(file_name);
-        if (surface==NULL) { //If it failed, say why and don't continue loading the texture
-            printf("Error: \"%s\"\n",SDL_GetError());
+        GLuint texture;
+        
+        SDL_Surface* Surface = IMG_Load(file_name);
+        
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        
+        int Mode = GL_RGB;
+        if(Surface->format->BytesPerPixel == 4) {
+            Mode = GL_RGBA;
         }
         
-        // Generate the OpenGL texture object
-        GLuint texture;
-        glGenTextures(1,&texture);
-        glBindTexture(GL_TEXTURE_2D,texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w,surface->h, 0, GL_RGB,GL_UNSIGNED_BYTE,surface->pixels);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexImage2D(GL_TEXTURE_2D, 0, Mode, Surface->w, Surface->h, 0, Mode, GL_UNSIGNED_BYTE, Surface->pixels);
         
-        SDL_FreeSurface(surface);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        
+        //Unload SDL's copy of the data; we don't need it anymore because OpenGL now stores it in the texture.
+        SDL_FreeSurface(Surface);
         return texture;
     }
 };

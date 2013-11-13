@@ -31,8 +31,8 @@ all : blox
 blox : $(CPPFILES) $(HPPFILES) 
 	$(CC) $(INCLUDE_PATHS) $(LIB_PATHS) $(LDFLAGS) $(CFLAGS) $(CPPFILES) -o blox
 
-tex : tex.c
-	$(CC) $(INCLUDE_PATHS) $(LIB_PATHS) $(LDFLAGS) $(CFLAGS) tex.c -o tex
+tex : Texture_Demo.c
+	$(CC) $(INCLUDE_PATHS) $(LIB_PATHS) $(LDFLAGS) $(CFLAGS) Texture_Demo.c -o tex
 
 run : blox.cpp blox
 	-./blox
